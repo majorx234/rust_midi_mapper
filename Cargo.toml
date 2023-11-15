@@ -8,8 +8,12 @@ edition = "2021"
 name = "midi_mapper"
 path = "src/lib.rs"
 
+[[bin]]
+name = "midi_debugger_gui"
+path = "src/midi_debugger/main.rs"
+
 [dependencies]
 jack = "0.10.0"
 wmidi = "4.0.0"
 crossbeam-channel = "0.5.6"
-
+eframe = { version = "0.18.0"}
