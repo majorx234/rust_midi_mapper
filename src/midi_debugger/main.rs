@@ -17,10 +17,12 @@ fn main() {
         midi_receiver: Some(midi_receiver),
         midi_thread: Some(jack_midi_thread),
         tx_close: Some(tx_close),
+        n_items: 0,
+        midi_msgs: Vec::new(),
     };
 
     let mut options = eframe::NativeOptions::default();
-    let window_size: eframe::egui::Vec2 = eframe::egui::Vec2::new(525.0, 530.0);
+    let window_size: eframe::egui::Vec2 = eframe::egui::Vec2::new(350.0, 530.0);
     options.initial_window_size = Some(window_size);
 
     eframe::run_native(
