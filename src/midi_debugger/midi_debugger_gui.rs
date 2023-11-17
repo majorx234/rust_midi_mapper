@@ -30,13 +30,16 @@ impl eframe::App for MidiDebuggerGui {
                 received_midi_msgs.push(m);
             }
         }
+        let window_size = _frame.info().window_info.size;
+        let window_width = window_size[0];
+        let window_height = window_size[1];
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("MidiDebugger");
             ui.vertical(|ui| {
                 if ui.button("close").clicked() {
                     if let Some(x) = &self.tx_close {
                         x.send(false).unwrap();
-                        _frame.quit();
+                        _frame.close();
                     };
                 }
 
@@ -44,11 +47,11 @@ impl eframe::App for MidiDebuggerGui {
                 self.n_items = self.midi_msgs.len();
                 let text_style = egui::TextStyle::Body;
                 let row_height = ui.text_style_height(&text_style);
-                ScrollArea::vertical().stick_to_bottom().show_rows(
-                    ui,
-                    row_height,
-                    self.n_items,
-                    |ui, row_range| {
+                ScrollArea::vertical()
+                    .stick_to_bottom(true)
+                    .min_scrolled_height(window_height)
+                    .min_scrolled_width(window_width)
+                    .show_rows(ui, row_height, self.n_items, |ui, row_range| {
                         for row in row_range {
                             if row > 0 {
                                 let bytes: &[u8] = &self.midi_msgs[row - 1].data;
@@ -58,8 +61,7 @@ impl eframe::App for MidiDebuggerGui {
                                 }
                             }
                         }
-                    },
-                );
+                    });
 
                 self.n_items += 1;
                 ui.ctx().request_repaint();
