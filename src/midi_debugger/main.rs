@@ -8,8 +8,8 @@ use midi_debugger_gui::MidiDebuggerGui;
 
 fn main() {
     let (midi_sender, midi_receiver): (
-        std::sync::mpsc::SyncSender<MidiMsg>,
-        std::sync::mpsc::Receiver<MidiMsg>,
+        std::sync::mpsc::SyncSender<Box<dyn MidiMsg>>,
+        std::sync::mpsc::Receiver<Box<dyn MidiMsg>>,
     ) = mpsc::sync_channel(64);
     let (tx_close, rx_close) = unbounded();
     let jack_midi_thread = start_jack_thread(rx_close, midi_sender);

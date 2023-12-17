@@ -3,11 +3,11 @@ use eframe::egui::{self, ScrollArea};
 use midi_mapper::jackmidi::MidiMsg;
 
 pub struct MidiDebuggerGui {
-    pub midi_receiver: Option<std::sync::mpsc::Receiver<MidiMsg>>,
+    pub midi_receiver: Option<std::sync::mpsc::Receiver<Box<dyn MidiMsg>>>,
     pub midi_thread: Option<std::thread::JoinHandle<()>>,
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub n_items: usize,
-    pub midi_msgs: Vec<MidiMsg>,
+    pub midi_msgs: Vec<Box<dyn MidiMsg>>,
 }
 
 impl Default for MidiDebuggerGui {
@@ -54,7 +54,7 @@ impl eframe::App for MidiDebuggerGui {
                     .show_rows(ui, row_height, self.n_items, |ui, row_range| {
                         for row in row_range {
                             if row > 0 {
-                                let bytes: &[u8] = &self.midi_msgs[row - 1].data;
+                                let bytes: &[u8] = &self.midi_msgs[row - 1].get_data();
                                 if let Ok(message) = wmidi::MidiMessage::try_from(bytes) {
                                     let text = format!("{:?}", message);
                                     ui.label(text);

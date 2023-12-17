@@ -8,7 +8,7 @@ use std::{process::exit, thread, time::Duration};
 
 pub fn start_jack_thread(
     rx_close: crossbeam_channel::Receiver<bool>,
-    midi_sender: std::sync::mpsc::SyncSender<MidiMsg>,
+    midi_sender: std::sync::mpsc::SyncSender<Box<dyn MidiMsg>>,
 ) -> std::thread::JoinHandle<()> {
     std::thread::spawn(move || {
         let mut run: bool = true;
@@ -37,7 +37,7 @@ pub fn start_jack_thread(
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
             for e in show_p {
-                let c: MidiMsg = e.into();
+                let c: Box<dyn MidiMsg> = e.into();
                 let _ = midi_sender.try_send(c);
             }
             jack::Control::Continue
