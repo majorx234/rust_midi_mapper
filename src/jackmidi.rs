@@ -72,6 +72,22 @@ impl MidiMsg for MidiMsgNoteOff {
     }
 }
 
+pub struct MidiMsgCC {
+    pub channel: u8,
+    pub control: u8,
+    pub value: u8,
+    pub time: jack::Frames,
+}
+
+impl MidiMsg for MidiMsgCC {
+    fn type_of(&self) -> &str {
+        "MidiMsgCC"
+    }
+    fn get_data(&self) -> Vec<u8> {
+        vec![self.channel, self.control, self.value]
+    }
+}
+
 impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
     fn from(midi: jack::RawMidi<'_>) -> Box<dyn MidiMsg> {
         let len = std::cmp::min(MAX_MIDI, midi.bytes.len());
