@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use crate::util::*;
 use std::convert::From;
 
 const MAX_MIDI: usize = 3;
@@ -43,7 +44,7 @@ impl MidiMsg for MidiMsgGeneric {
 
 pub struct MidiMsgControlChange {
     pub channel: u8,
-    pub number: u8,
+    pub control: u8,
     pub value: u8,
     pub time: jack::Frames,
 }
@@ -53,7 +54,7 @@ impl MidiMsg for MidiMsgControlChange {
         "MidiMsgControlChange"
     }
     fn get_data(&self) -> Vec<u8> {
-        vec![self.channel, self.number, self.value]
+        vec![self.channel, self.control, self.value]
     }
 }
 
@@ -89,32 +90,43 @@ impl MidiMsg for MidiMsgNoteOff {
     }
 }
 
-pub struct MidiMsgCC {
-    pub channel: u8,
-    pub control: u8,
-    pub value: u8,
-    pub time: jack::Frames,
-}
-
-impl MidiMsg for MidiMsgCC {
-    fn type_of(&self) -> &str {
-        "MidiMsgCC"
-    }
-    fn get_data(&self) -> Vec<u8> {
-        vec![self.channel, self.control, self.value]
-    }
-}
-
 impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
     fn from(midi: jack::RawMidi<'_>) -> Box<dyn MidiMsg> {
         let len = std::cmp::min(MAX_MIDI, midi.bytes.len());
-        let mut data = [0; MAX_MIDI];
-        data[..len].copy_from_slice(&midi.bytes[..len]);
-        Box::new(MidiMsgGeneric {
-            len,
-            data,
-            time: midi.time,
-        })
+        let (status, channel) = from_status_byte(midi.bytes[0]);
+        if status == 0x08 {
+            // NoteOff
+            Box::new(MidiMsgNoteOff {
+                channel,
+                key: mask7(midi.bytes[1]),
+                velocity: mask7(midi.bytes[2]),
+                time: midi.time,
+            })
+        } else if status == 0x09 {
+            // NoteOn
+            Box::new(MidiMsgNoteOn {
+                channel,
+                key: mask7(midi.bytes[1]),
+                velocity: mask7(midi.bytes[2]),
+                time: midi.time,
+            })
+        } else if status == 0x0b {
+            // MidiCC
+            Box::new(MidiMsgControlChange {
+                channel,
+                control: mask7(midi.bytes[1]),
+                value: mask7(midi.bytes[2]),
+                time: midi.time,
+            })
+        } else {
+            let mut data = [0; MAX_MIDI];
+            data[..len].copy_from_slice(&midi.bytes[..len]);
+            Box::new(MidiMsgGeneric {
+                len,
+                data,
+                time: midi.time,
+            })
+        }
     }
 }
 
