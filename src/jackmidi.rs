@@ -42,6 +42,18 @@ impl MidiMsg for MidiMsgGeneric {
     }
 }
 
+impl std::fmt::Debug for MidiMsgGeneric {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "MidiGeneric: time: {}, len: {}, data: {:?}",
+            self.time,
+            self.len,
+            &self.data[..self.len]
+        )
+    }
+}
+
 pub struct MidiMsgControlChange {
     pub channel: u8,
     pub control: u8,
@@ -55,6 +67,16 @@ impl MidiMsg for MidiMsgControlChange {
     }
     fn get_data(&self) -> Vec<u8> {
         vec![self.channel, self.control, self.value]
+    }
+}
+
+impl std::fmt::Debug for MidiMsgControlChange {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "MidiControlChange: time: {}, len: 3, channel: {}, control: {}, value: {}",
+            self.time, self.channel, self.control, self.value,
+        )
     }
 }
 
@@ -74,6 +96,16 @@ impl MidiMsg for MidiMsgNoteOn {
     }
 }
 
+impl std::fmt::Debug for MidiMsgNoteOn {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "MidiNoteOn: time: {}, len: 3, channel: {}, key: {}, velocity: {}",
+            self.time, self.channel, self.key, self.velocity,
+        )
+    }
+}
+
 pub struct MidiMsgNoteOff {
     pub channel: u8,
     pub key: u8,
@@ -87,6 +119,16 @@ impl MidiMsg for MidiMsgNoteOff {
     }
     fn get_data(&self) -> Vec<u8> {
         vec![self.channel, self.key, self.velocity]
+    }
+}
+
+impl std::fmt::Debug for MidiMsgNoteOff {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "MidiNoteOff: time: {}, len: 3, channel: {}, key: {}, velocity: {}",
+            self.time, self.channel, self.key, self.velocity,
+        )
     }
 }
 
@@ -127,17 +169,5 @@ impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
                 time: midi.time,
             })
         }
-    }
-}
-
-impl std::fmt::Debug for MidiMsgGeneric {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(
-            f,
-            "Midi {{ time: {}, len: {}, data: {:?} }}",
-            self.time,
-            self.len,
-            &self.data[..self.len]
-        )
     }
 }
