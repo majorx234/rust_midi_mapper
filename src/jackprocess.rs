@@ -19,7 +19,6 @@ extern crate jack;
 extern crate wmidi;
 
 use crate::jackmidi::MidiMsg;
-use crossbeam_channel::unbounded;
 
 use std::{process::exit, thread, time::Duration};
 
@@ -69,5 +68,6 @@ pub fn start_jack_thread(
                 Err(_) => run = false,
             }
         }
+        let _ = active_client.deactivate();
     })
 }

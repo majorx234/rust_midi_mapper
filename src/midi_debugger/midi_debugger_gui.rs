@@ -15,7 +15,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crossbeam_channel::unbounded;
 use eframe::egui::{self, ScrollArea};
 use midi_mapper::jackmidi::MidiMsg;
 
