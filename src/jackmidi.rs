@@ -239,6 +239,13 @@ impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
                 value: mask7(midi.bytes[2]),
                 time: midi.time,
             })
+        } else if status == 0x0e {
+            // MidiPitchBend
+            Box::new(MidiMsgPitchBend {
+                channel,
+                value: msb_lsb_to_u14(mask7(midi.bytes[2]), mask7(midi.bytes[1])),
+                time: midi.time,
+            })
         } else {
             let mut data = [0; MAX_MIDI];
             data[..len].copy_from_slice(&midi.bytes[..len]);
