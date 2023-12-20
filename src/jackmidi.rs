@@ -30,7 +30,7 @@ pub trait MidiMsg: Send + std::fmt::Display {
 pub struct MidiMsgGeneric {
     pub len: usize,
     pub data: [u8; MAX_MIDI],
-    pub time: jack::Frames,
+    pub time: u64,
 }
 
 impl MidiMsg for MidiMsgGeneric {
@@ -71,7 +71,7 @@ pub struct MidiMsgControlChange {
     pub channel: u8,
     pub control: u8,
     pub value: u8,
-    pub time: jack::Frames,
+    pub time: u64,
 }
 
 impl MidiMsg for MidiMsgControlChange {
@@ -107,7 +107,7 @@ pub struct MidiMsgNoteOn {
     pub channel: u8,
     pub key: u8,
     pub velocity: u8,
-    pub time: jack::Frames,
+    pub time: u64,
 }
 
 impl MidiMsg for MidiMsgNoteOn {
@@ -143,7 +143,7 @@ pub struct MidiMsgNoteOff {
     pub channel: u8,
     pub key: u8,
     pub velocity: u8,
-    pub time: jack::Frames,
+    pub time: u64,
 }
 
 impl MidiMsg for MidiMsgNoteOff {
@@ -178,7 +178,7 @@ impl std::fmt::Display for MidiMsgNoteOff {
 pub struct MidiMsgPitchBend {
     pub channel: u8,
     pub value: u16,
-    pub time: jack::Frames,
+    pub time: u64,
 }
 
 impl MidiMsg for MidiMsgPitchBend {
@@ -213,6 +213,7 @@ impl std::fmt::Display for MidiMsgPitchBend {
 
 impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
     fn from(midi: jack::RawMidi<'_>) -> Box<dyn MidiMsg> {
+        let midi_time = midi.time as u64 + jack::get_time();
         let len = std::cmp::min(MAX_MIDI, midi.bytes.len());
         let (status, channel) = from_status_byte(midi.bytes[0]);
         if status == 0x08 {
@@ -221,7 +222,7 @@ impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
                 channel,
                 key: mask7(midi.bytes[1]),
                 velocity: mask7(midi.bytes[2]),
-                time: midi.time,
+                time: midi_time,
             })
         } else if status == 0x09 {
             // NoteOn
@@ -229,7 +230,7 @@ impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
                 channel,
                 key: mask7(midi.bytes[1]),
                 velocity: mask7(midi.bytes[2]),
-                time: midi.time,
+                time: midi_time,
             })
         } else if status == 0x0b {
             // MidiCC
@@ -237,14 +238,14 @@ impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
                 channel,
                 control: mask7(midi.bytes[1]),
                 value: mask7(midi.bytes[2]),
-                time: midi.time,
+                time: midi_time,
             })
         } else if status == 0x0e {
             // MidiPitchBend
             Box::new(MidiMsgPitchBend {
                 channel,
                 value: msb_lsb_to_u14(mask7(midi.bytes[2]), mask7(midi.bytes[1])),
-                time: midi.time,
+                time: midi_time,
             })
         } else {
             let mut data = [0; MAX_MIDI];
@@ -252,7 +253,7 @@ impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
             Box::new(MidiMsgGeneric {
                 len,
                 data,
-                time: midi.time,
+                time: midi_time,
             })
         }
     }
