@@ -20,7 +20,7 @@ use std::convert::From;
 
 const MAX_MIDI: usize = 3;
 
-pub trait MidiMsg: Send {
+pub trait MidiMsg: Send + std::fmt::Display {
     fn type_of(&self) -> &str;
     fn get_data(&self) -> Vec<u8>;
 }
@@ -43,6 +43,19 @@ impl MidiMsg for MidiMsgGeneric {
 }
 
 impl std::fmt::Debug for MidiMsgGeneric {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "MidiGeneric: time: {}, len: {}, data: {:?}",
+            self.time,
+            self.len,
+            &self.data[..self.len]
+        )
+    }
+}
+
+impl std::fmt::Display for MidiMsgGeneric {
+    // This trait requires `fmt` with this exact signature.
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
@@ -80,6 +93,16 @@ impl std::fmt::Debug for MidiMsgControlChange {
     }
 }
 
+impl std::fmt::Display for MidiMsgControlChange {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "MidiControlChange: time: {}, len: 3, channel: {}, control: {}, value: {}",
+            self.time, self.channel, self.control, self.value,
+        )
+    }
+}
+
 pub struct MidiMsgNoteOn {
     pub channel: u8,
     pub key: u8,
@@ -106,6 +129,16 @@ impl std::fmt::Debug for MidiMsgNoteOn {
     }
 }
 
+impl std::fmt::Display for MidiMsgNoteOn {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "MidiNoteOn: time: {}, len: 3, channel: {}, key: {}, velocity: {}",
+            self.time, self.channel, self.key, self.velocity,
+        )
+    }
+}
+
 pub struct MidiMsgNoteOff {
     pub channel: u8,
     pub key: u8,
@@ -123,6 +156,16 @@ impl MidiMsg for MidiMsgNoteOff {
 }
 
 impl std::fmt::Debug for MidiMsgNoteOff {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "MidiNoteOff: time: {}, len: 3, channel: {}, key: {}, velocity: {}",
+            self.time, self.channel, self.key, self.velocity,
+        )
+    }
+}
+
+impl std::fmt::Display for MidiMsgNoteOff {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
