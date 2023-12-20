@@ -70,11 +70,8 @@ impl eframe::App for MidiDebuggerGui {
                     .show_rows(ui, row_height, self.n_items, |ui, row_range| {
                         for row in row_range {
                             if row > 0 {
-                                let bytes: &[u8] = &self.midi_msgs[row - 1].get_data();
-                                if let Ok(message) = wmidi::MidiMessage::try_from(bytes) {
-                                    let text = format!("{:?}", message);
-                                    ui.label(text);
-                                }
+                                let text = format!("{}", self.midi_msgs[row - 1]);
+                                ui.label(text);
                             }
                         }
                     });

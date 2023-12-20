@@ -16,7 +16,6 @@
  */
 
 extern crate jack;
-extern crate wmidi;
 
 use crate::jackmidi::MidiMsg;
 
