@@ -175,6 +175,42 @@ impl std::fmt::Display for MidiMsgNoteOff {
     }
 }
 
+pub struct MidiMsgPitchBend {
+    pub channel: u8,
+    pub value: u16,
+    pub time: jack::Frames,
+}
+
+impl MidiMsg for MidiMsgPitchBend {
+    fn type_of(&self) -> &str {
+        "MidiMsgPitchBend"
+    }
+    fn get_data(&self) -> Vec<u8> {
+        let (msb_value, lsb_value) = u14_to_msb_lsb(self.value);
+        vec![self.channel, lsb_value, msb_value]
+    }
+}
+
+impl std::fmt::Debug for MidiMsgPitchBend {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "MidiMsgPitchBend: time: {}, len: 3, channel: {}, value: {}",
+            self.time, self.channel, self.value,
+        )
+    }
+}
+
+impl std::fmt::Display for MidiMsgPitchBend {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "MidiMsgPitchBend: time: {}, len: 3, channel: {}, value: {}",
+            self.time, self.channel, self.value,
+        )
+    }
+}
+
 impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
     fn from(midi: jack::RawMidi<'_>) -> Box<dyn MidiMsg> {
         let len = std::cmp::min(MAX_MIDI, midi.bytes.len());
