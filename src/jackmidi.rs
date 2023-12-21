@@ -23,6 +23,8 @@ const MAX_MIDI: usize = 3;
 pub trait MidiMsg: Send + std::fmt::Display {
     fn type_of(&self) -> &str;
     fn get_data(&self) -> Vec<u8>;
+    fn get_id(&self) -> u16;
+    fn get_value(&self) -> u16;
 }
 
 //a fixed size container to copy data out of real-time thread
@@ -39,6 +41,12 @@ impl MidiMsg for MidiMsgGeneric {
     }
     fn get_data(&self) -> Vec<u8> {
         self.data.into_iter().collect()
+    }
+    fn get_id(&self) -> u16 {
+        u16::max_value()
+    }
+    fn get_value(&self) -> u16 {
+        0
     }
 }
 
@@ -81,6 +89,12 @@ impl MidiMsg for MidiMsgControlChange {
     fn get_data(&self) -> Vec<u8> {
         vec![self.channel, self.control, self.value]
     }
+    fn get_id(&self) -> u16 {
+        0xB000 + ((self.channel as u16) << 8) + self.control as u16
+    }
+    fn get_value(&self) -> u16 {
+        self.value as u16
+    }
 }
 
 impl std::fmt::Debug for MidiMsgControlChange {
@@ -116,6 +130,12 @@ impl MidiMsg for MidiMsgNoteOn {
     }
     fn get_data(&self) -> Vec<u8> {
         vec![self.channel, self.key, self.velocity]
+    }
+    fn get_id(&self) -> u16 {
+        0x9000 + ((self.channel as u16) << 8) + self.key as u16
+    }
+    fn get_value(&self) -> u16 {
+        self.velocity as u16
     }
 }
 
@@ -153,6 +173,12 @@ impl MidiMsg for MidiMsgNoteOff {
     fn get_data(&self) -> Vec<u8> {
         vec![self.channel, self.key, self.velocity]
     }
+    fn get_id(&self) -> u16 {
+        0x8000 + ((self.channel as u16) << 8) + self.key as u16
+    }
+    fn get_value(&self) -> u16 {
+        self.velocity as u16
+    }
 }
 
 impl std::fmt::Debug for MidiMsgNoteOff {
@@ -188,6 +214,12 @@ impl MidiMsg for MidiMsgPitchBend {
     fn get_data(&self) -> Vec<u8> {
         let (msb_value, lsb_value) = u14_to_msb_lsb(self.value);
         vec![self.channel, lsb_value, msb_value]
+    }
+    fn get_id(&self) -> u16 {
+        0xE000 + ((self.channel as u16) << 8)
+    }
+    fn get_value(&self) -> u16 {
+        0
     }
 }
 
