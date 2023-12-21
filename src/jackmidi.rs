@@ -87,7 +87,7 @@ impl MidiMsg for MidiMsgControlChange {
         "MidiMsgControlChange"
     }
     fn get_data(&self) -> Vec<u8> {
-        vec![self.channel, self.control, self.value]
+        vec![0xB0 + self.channel, self.control, self.value]
     }
     fn get_id(&self) -> u16 {
         0xB000 + ((self.channel as u16) << 8) + self.control as u16
@@ -129,7 +129,7 @@ impl MidiMsg for MidiMsgNoteOn {
         "MidiMsgNoteOn"
     }
     fn get_data(&self) -> Vec<u8> {
-        vec![self.channel, self.key, self.velocity]
+        vec![0x90 + self.channel, self.key, self.velocity]
     }
     fn get_id(&self) -> u16 {
         0x9000 + ((self.channel as u16) << 8) + self.key as u16
@@ -171,7 +171,7 @@ impl MidiMsg for MidiMsgNoteOff {
         "MidiMsgNoteOff"
     }
     fn get_data(&self) -> Vec<u8> {
-        vec![self.channel, self.key, self.velocity]
+        vec![0x80 + self.channel, self.key, self.velocity]
     }
     fn get_id(&self) -> u16 {
         0x8000 + ((self.channel as u16) << 8) + self.key as u16
@@ -213,7 +213,7 @@ impl MidiMsg for MidiMsgPitchBend {
     }
     fn get_data(&self) -> Vec<u8> {
         let (msb_value, lsb_value) = u14_to_msb_lsb(self.value);
-        vec![self.channel, lsb_value, msb_value]
+        vec![0xE0 + self.channel, lsb_value, msb_value]
     }
     fn get_id(&self) -> u16 {
         0xE000 + ((self.channel as u16) << 8)
