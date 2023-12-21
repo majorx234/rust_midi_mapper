@@ -38,7 +38,7 @@ fn main() {
     };
 
     let mut options = eframe::NativeOptions::default();
-    let window_size: eframe::egui::Vec2 = eframe::egui::Vec2::new(350.0, 530.0);
+    let window_size: eframe::egui::Vec2 = eframe::egui::Vec2::new(500.0, 530.0);
     options.initial_window_size = Some(window_size);
 
     let _ = eframe::run_native(
