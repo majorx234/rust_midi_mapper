@@ -16,7 +16,10 @@
  */
 
 use eframe::egui::{self, ScrollArea};
-use midi_mapper::{jackmidi::MidiMsg, midi_egui_elements::midi_value_indicator};
+use midi_mapper::{
+    jackmidi::MidiMsg,
+    midi_egui_elements::{midi_id_value_indicator, midi_value_indicator},
+};
 use std::collections::hash_map::HashMap;
 
 pub struct MidiElementsGui {
@@ -78,9 +81,9 @@ impl eframe::App for MidiElementsGui {
                         let mut row: usize = 0;
                         for (key, value) in self.midi_elements_map.iter() {
                             if row_range.contains(&row) {
-                                let text = format!("{}", key);
-                                ui.label(text);
-                                ui.add(midi_value_indicator(*value as u32));
+                                // let text = format!("{}", key);
+                                // ui.label(text);
+                                ui.add(midi_id_value_indicator(*key as u32, *value as u32));
                             } else {
                                 println!("row error");
                             }
