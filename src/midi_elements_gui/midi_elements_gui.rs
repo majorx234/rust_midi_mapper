@@ -17,13 +17,14 @@
 
 use eframe::egui::{self, ScrollArea};
 use midi_mapper::jackmidi::MidiMsg;
+use std::collections::hash_map::HashMap;
 
 pub struct MidiElementsGui {
     pub midi_receiver: Option<std::sync::mpsc::Receiver<Box<dyn MidiMsg>>>,
     pub midi_thread: Option<std::thread::JoinHandle<()>>,
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub n_items: usize,
-    pub midi_msgs: Vec<Box<dyn MidiMsg>>,
+    pub midi_elements_map: HashMap<u16, u16>,
 }
 
 impl Default for MidiElementsGui {
@@ -33,7 +34,7 @@ impl Default for MidiElementsGui {
             midi_thread: None,
             tx_close: None,
             n_items: 0,
-            midi_msgs: Vec::new(),
+            midi_elements_map: HashMap::new(),
         }
     }
 }
@@ -58,9 +59,13 @@ impl eframe::App for MidiElementsGui {
                         _frame.close();
                     };
                 }
+                for msg in received_midi_msgs {
+                    let id = msg.get_id();
+                    let value = msg.get_value();
+                    self.midi_elements_map.insert(id, value);
+                }
 
-                self.midi_msgs.append(&mut received_midi_msgs);
-                self.n_items = self.midi_msgs.len();
+                self.n_items = self.midi_elements_map.len();
                 let text_style = egui::TextStyle::Body;
                 let row_height = ui.text_style_height(&text_style);
                 ScrollArea::vertical()
@@ -70,11 +75,15 @@ impl eframe::App for MidiElementsGui {
                     .min_scrolled_width(window_width - 40.0)
                     .max_width(window_width - 40.0)
                     .show_rows(ui, row_height, self.n_items, |ui, row_range| {
-                        for row in row_range {
-                            if row > 0 {
-                                let text = format!("{}", self.midi_msgs[row - 1]);
+                        let mut row: usize = 0;
+                        for (key, value) in self.midi_elements_map.iter() {
+                            if row_range.contains(&row) {
+                                let text = format!("{} value: {}", key, value);
                                 ui.label(text);
+                            } else {
+                                println!("row error");
                             }
+                            row += 1;
                         }
                     });
 

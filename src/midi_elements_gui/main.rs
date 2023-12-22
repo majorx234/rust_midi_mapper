@@ -18,7 +18,7 @@
 use crossbeam_channel::unbounded;
 use eframe;
 use midi_mapper::{jackmidi::MidiMsg, jackprocess::start_jack_thread};
-use std::sync::mpsc;
+use std::{collections::HashMap, sync::mpsc};
 mod midi_elements_gui;
 use midi_elements_gui::MidiElementsGui;
 
@@ -34,7 +34,7 @@ fn main() {
         midi_thread: Some(jack_midi_thread),
         tx_close: Some(tx_close),
         n_items: 0,
-        midi_msgs: Vec::new(),
+        midi_elements_map: HashMap::new(),
     };
 
     let mut options = eframe::NativeOptions::default();
