@@ -19,4 +19,4 @@ path = "src/midi_elements_gui/main.rs"
 [dependencies]
 jack = "0.11.4"
 crossbeam-channel = "0.5.8"
-eframe = { version = "0.23.0"}
+eframe = { version = "0.24.1"}

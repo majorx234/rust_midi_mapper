@@ -15,11 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use eframe::egui::{self, ScrollArea};
-use midi_mapper::{
-    jackmidi::MidiMsg,
-    midi_egui_elements::{midi_id_value_indicator, midi_value_indicator},
-};
+use eframe::egui::{self, ScrollArea, ViewportCommand};
+use midi_mapper::{jackmidi::MidiMsg, midi_egui_elements::midi_id_value_indicator};
 use std::collections::hash_map::HashMap;
 
 pub struct MidiElementsGui {
@@ -50,16 +47,16 @@ impl eframe::App for MidiElementsGui {
                 received_midi_msgs.push(m);
             }
         }
-        let window_size = _frame.info().window_info.size;
-        let window_width = window_size[0];
-        let window_height = window_size[1];
         egui::CentralPanel::default().show(ctx, |ui| {
+            let window_rect = ctx.input(|i| i.viewport().outer_rect).unwrap();
+            let window_width = window_rect.width();
+            let window_height = window_rect.height();
             ui.heading("MidiElementsGui");
             ui.vertical(|ui| {
                 if ui.button("close").clicked() {
                     if let Some(x) = &self.tx_close {
                         x.send(false).unwrap();
-                        _frame.close();
+                        ctx.send_viewport_cmd(ViewportCommand::Close)
                     };
                 }
                 for msg in received_midi_msgs {

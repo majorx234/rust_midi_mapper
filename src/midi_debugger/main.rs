@@ -16,7 +16,7 @@
  */
 
 use crossbeam_channel::unbounded;
-use eframe;
+use eframe::{self, egui::ViewportBuilder};
 use midi_mapper::{jackmidi::MidiMsg, jackprocess::start_jack_thread};
 use std::sync::mpsc;
 mod midi_debugger_gui;
@@ -37,9 +37,10 @@ fn main() {
         midi_msgs: Vec::new(),
     };
 
-    let mut options = eframe::NativeOptions::default();
-    let window_size: eframe::egui::Vec2 = eframe::egui::Vec2::new(500.0, 530.0);
-    options.initial_window_size = Some(window_size);
+    let options = eframe::NativeOptions {
+        viewport: ViewportBuilder::default().with_inner_size([600.0, 600.0]),
+        ..Default::default()
+    };
 
     let _ = eframe::run_native(
         "MidiDebuggerGui",
