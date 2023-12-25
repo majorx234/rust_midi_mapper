@@ -16,15 +16,20 @@
  */
 
 use eframe::egui::{self, ScrollArea, ViewportCommand};
-use midi_mapper::{jackmidi::MidiMsg, midi_egui_elements::midi_id_value_indicator};
-use std::collections::hash_map::HashMap;
+use midi_mapper::{
+    jackmidi::MidiMsg, midi_egui_elements::midi_id_value_indicator, midi_function::MidiFunction,
+};
+use std::collections::{HashMap, HashSet};
 
 pub struct MidiElementsGui {
     pub midi_receiver: Option<std::sync::mpsc::Receiver<Box<dyn MidiMsg>>>,
     pub midi_thread: Option<std::thread::JoinHandle<()>>,
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub n_items: usize,
+    pub midi_functions: HashSet<MidiFunction>,
+    pub midi_functions_with_elements_ids: HashMap<MidiFunction, u16>,
     pub midi_elements_map: HashMap<u16, u16>,
+    pub selected_midi_function: Option<MidiFunction>,
 }
 
 impl Default for MidiElementsGui {
@@ -34,7 +39,10 @@ impl Default for MidiElementsGui {
             midi_thread: None,
             tx_close: None,
             n_items: 0,
+            midi_functions: HashSet::new(),
+            midi_functions_with_elements_ids: HashMap::new(),
             midi_elements_map: HashMap::new(),
+            selected_midi_function: None,
         }
     }
 }
@@ -94,6 +102,9 @@ impl eframe::App for MidiElementsGui {
 
                 ui.ctx().request_repaint();
             });
+        });
+        egui::SidePanel::right("midi function with ids events").show(ctx, |ui| {
+            ui.label("nothing here yet2!");
         });
     }
 }

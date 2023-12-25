@@ -17,8 +17,11 @@
 
 use crossbeam_channel::unbounded;
 use eframe::{self, egui::ViewportBuilder};
-use midi_mapper::{jackmidi::MidiMsg, jackprocess::start_jack_thread};
-use std::{collections::HashMap, sync::mpsc};
+use midi_mapper::{jackmidi::MidiMsg, jackprocess::start_jack_thread, midi_function::MidiFunction};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::mpsc,
+};
 mod midi_elements_gui;
 use midi_elements_gui::MidiElementsGui;
 
@@ -29,12 +32,21 @@ fn main() {
     ) = mpsc::sync_channel(64);
     let (tx_close, rx_close) = unbounded();
     let jack_midi_thread = start_jack_thread(rx_close, midi_sender);
+    let midi_functions: HashSet<MidiFunction> = HashSet::from([
+        MidiFunction::Volume,
+        MidiFunction::Modulate,
+        MidiFunction::FmIntensity,
+    ]);
+    let midi_functions_with_elements_ids: HashMap<MidiFunction, u16> = HashMap::new();
     let midi_elements_gui = MidiElementsGui {
         midi_receiver: Some(midi_receiver),
         midi_thread: Some(jack_midi_thread),
         tx_close: Some(tx_close),
         n_items: 0,
+        midi_functions,
+        midi_functions_with_elements_ids,
         midi_elements_map: HashMap::new(),
+        selected_midi_function: None,
     };
 
     let options = eframe::NativeOptions {
