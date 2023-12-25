@@ -47,18 +47,26 @@ impl eframe::App for MidiElementsGui {
                 received_midi_msgs.push(m);
             }
         }
-        egui::CentralPanel::default().show(ctx, |ui| {
-            let window_rect = ctx.input(|i| i.viewport().outer_rect).unwrap();
-            let window_width = window_rect.width();
-            let window_height = window_rect.height();
-            ui.heading("MidiElementsGui");
+        egui::TopBottomPanel::top("control").show(ctx, |ui| {
             ui.vertical(|ui| {
+                ui.heading("MidiElementsGui");
                 if ui.button("close").clicked() {
                     if let Some(x) = &self.tx_close {
                         x.send(false).unwrap();
                         ctx.send_viewport_cmd(ViewportCommand::Close)
                     };
                 }
+            });
+        });
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.label("nothing here yet!");
+        });
+        egui::SidePanel::right("midi id events").show(ctx, |ui| {
+            let window_rect = ctx.input(|i| i.viewport().outer_rect).unwrap();
+            let window_width = window_rect.width();
+            let window_height = window_rect.height();
+
+            ui.vertical(|ui| {
                 for msg in received_midi_msgs {
                     let id = msg.get_id();
                     let value = msg.get_value();
@@ -75,16 +83,12 @@ impl eframe::App for MidiElementsGui {
                     .min_scrolled_width(window_width - 40.0)
                     .max_width(window_width - 40.0)
                     .show_rows(ui, row_height, self.n_items, |ui, row_range| {
-                        let mut row: usize = 0;
-                        for (key, value) in self.midi_elements_map.iter() {
+                        for (row, (key, value)) in self.midi_elements_map.iter().enumerate() {
                             if row_range.contains(&row) {
-                                // let text = format!("{}", key);
-                                // ui.label(text);
                                 ui.add(midi_id_value_indicator(*key as u32, *value as u32));
                             } else {
                                 println!("row error");
                             }
-                            row += 1;
                         }
                     });
 
