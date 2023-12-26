@@ -37,7 +37,7 @@ fn main() {
         MidiFunction::Modulate,
         MidiFunction::FmIntensity,
     ]);
-    let midi_functions_with_elements_ids: HashMap<MidiFunction, u16> = HashMap::new();
+    let midi_functions_with_elements_ids: HashMap<MidiFunction, Vec<u16>> = HashMap::new();
     let midi_elements_gui = MidiElementsGui {
         midi_receiver: Some(midi_receiver),
         midi_thread: Some(jack_midi_thread),

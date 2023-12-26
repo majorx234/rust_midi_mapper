@@ -27,7 +27,7 @@ pub struct MidiElementsGui {
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub n_items: usize,
     pub midi_functions: HashSet<MidiFunction>,
-    pub midi_functions_with_elements_ids: HashMap<MidiFunction, u16>,
+    pub midi_functions_with_elements_ids: HashMap<MidiFunction, Vec<u16>>,
     pub midi_elements_map: HashMap<u16, u16>,
     pub selected_midi_function: Option<MidiFunction>,
 }
@@ -67,7 +67,13 @@ impl eframe::App for MidiElementsGui {
             });
         });
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.label("nothing here yet!");
+            for midi_function in self.midi_functions.iter() {
+                if ui.button(format!("{}", midi_function)).clicked() {
+                    let midi_function_cpy = midi_function.clone();
+                    self.selected_midi_function = Some(midi_function_cpy);
+                }
+            }
+            ui.label("midi_functions");
         });
         egui::SidePanel::right("midi id events").show(ctx, |ui| {
             let window_rect = ctx.input(|i| i.viewport().outer_rect).unwrap();
@@ -99,12 +105,19 @@ impl eframe::App for MidiElementsGui {
                             }
                         }
                     });
-
                 ui.ctx().request_repaint();
             });
         });
         egui::SidePanel::right("midi function with ids events").show(ctx, |ui| {
-            ui.label("nothing here yet2!");
+            if let Some(midi_function) = self.selected_midi_function {
+                if let Some(selected_midi_events) =
+                    self.midi_functions_with_elements_ids.get(&midi_function)
+                {
+                    for event in selected_midi_events {
+                        ui.label(format!("{}", event));
+                    }
+                }
+            }
         });
     }
 }
