@@ -10,11 +10,11 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "midi_debugger_gui"
-path = "src/midi_debugger/main.rs"
+path = "src/bin/midi_debugger/main.rs"
 
 [[bin]]
 name = "midi_elements_gui"
-path = "src/midi_elements_gui/main.rs"
+path = "src/bin/midi_elements_gui/main.rs"
 
 [dependencies]
 jack = "0.11.4"

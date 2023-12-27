@@ -64,6 +64,9 @@ impl eframe::App for MidiElementsGui {
                         ctx.send_viewport_cmd(ViewportCommand::Close)
                     };
                 }
+                if ui.button("export as json").clicked() {
+                    println!("n.i.y");
+                }
             });
         });
         // show list of offered midi functions
