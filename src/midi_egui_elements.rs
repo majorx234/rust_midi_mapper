@@ -162,8 +162,7 @@ fn midi_id_value_indicator_ui(ui: &mut egui::Ui, id: u32, intensity: u32) -> egu
     let height = 1.0;
     let desired_size = ui.spacing().interact_size.y * egui::vec2(width, height);
 
-    let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::hover());
-    //TODO implement painter
+    let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
     if ui.is_rect_visible(response.rect) {
         let visuals = ui.style().visuals.clone();
         let rounding = rect.height() / 2.0;

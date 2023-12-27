@@ -37,7 +37,10 @@ fn main() {
         MidiFunction::Modulate,
         MidiFunction::FmIntensity,
     ]);
-    let midi_functions_with_elements_ids: HashMap<MidiFunction, Vec<u16>> = HashMap::new();
+    let mut midi_functions_with_elements_ids: HashMap<MidiFunction, Vec<u16>> = HashMap::new();
+    midi_functions_with_elements_ids.insert(MidiFunction::Volume, Vec::new());
+    midi_functions_with_elements_ids.insert(MidiFunction::Modulate, Vec::new());
+    midi_functions_with_elements_ids.insert(MidiFunction::FmIntensity, Vec::new());
     let midi_elements_gui = MidiElementsGui {
         midi_receiver: Some(midi_receiver),
         midi_thread: Some(jack_midi_thread),

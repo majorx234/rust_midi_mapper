@@ -66,6 +66,7 @@ impl eframe::App for MidiElementsGui {
                 }
             });
         });
+        // show list of offered midi functions
         egui::CentralPanel::default().show(ctx, |ui| {
             for midi_function in self.midi_functions.iter() {
                 if ui.button(format!("{}", midi_function)).clicked() {
@@ -73,8 +74,8 @@ impl eframe::App for MidiElementsGui {
                     self.selected_midi_function = Some(midi_function_cpy);
                 }
             }
-            ui.label("midi_functions");
         });
+        // show list of Midi events
         egui::SidePanel::right("midi id events").show(ctx, |ui| {
             let window_rect = ctx.input(|i| i.viewport().outer_rect).unwrap();
             let window_width = window_rect.width();
@@ -99,7 +100,21 @@ impl eframe::App for MidiElementsGui {
                     .show_rows(ui, row_height, self.n_items, |ui, row_range| {
                         for (row, (key, value)) in self.midi_elements_map.iter().enumerate() {
                             if row_range.contains(&row) {
-                                ui.add(midi_id_value_indicator(*key as u32, *value as u32));
+                                if ui
+                                    .add(midi_id_value_indicator(*key as u32, *value as u32))
+                                    .clicked()
+                                {
+                                    if let Some(selected_midi_function) =
+                                        self.selected_midi_function
+                                    {
+                                        if let Some(ref mut midi_elements_id) = self
+                                            .midi_functions_with_elements_ids
+                                            .get_mut(&selected_midi_function)
+                                        {
+                                            midi_elements_id.push(*key);
+                                        }
+                                    }
+                                }
                             } else {
                                 println!("row error");
                             }
@@ -108,13 +123,21 @@ impl eframe::App for MidiElementsGui {
                 ui.ctx().request_repaint();
             });
         });
+        // show list of midi events of selected midi function
         egui::SidePanel::right("midi function with ids events").show(ctx, |ui| {
             if let Some(midi_function) = self.selected_midi_function {
-                if let Some(selected_midi_events) =
-                    self.midi_functions_with_elements_ids.get(&midi_function)
+                if let Some(ref mut selected_midi_events) = self
+                    .midi_functions_with_elements_ids
+                    .get_mut(&midi_function)
                 {
-                    for event in selected_midi_events {
-                        ui.label(format!("{}", event));
+                    let mut index_to_remove: Option<usize> = None;
+                    for (idx, event) in selected_midi_events.iter().enumerate() {
+                        if ui.button(format!("{}", *event)).clicked() {
+                            index_to_remove = Some(idx);
+                        }
+                    }
+                    if let Some(index_to_remove) = index_to_remove {
+                        selected_midi_events.remove(index_to_remove);
                     }
                 }
             }
