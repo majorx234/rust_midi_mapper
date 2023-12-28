@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Hash, Eq, PartialEq, Copy, Clone, Debug)]
+#[derive(Hash, Eq, PartialEq, Serialize, Deserialize, Copy, Clone, Debug)]
 pub enum MidiFunction {
     Play,
     Volume,

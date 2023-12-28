@@ -20,3 +20,5 @@ path = "src/bin/midi_elements_gui/main.rs"
 jack = "0.11.4"
 crossbeam-channel = "0.5.8"
 eframe = { version = "0.24.1"}
+serde = { version = "1.0.193" }
+serde_json = { version = "1.0.108"}

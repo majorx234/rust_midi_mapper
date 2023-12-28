@@ -19,7 +19,10 @@ use eframe::egui::{self, ScrollArea, ViewportCommand};
 use midi_mapper::{
     jackmidi::MidiMsg, midi_egui_elements::midi_id_value_indicator, midi_function::MidiFunction,
 };
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    path::PathBuf,
+};
 
 pub struct MidiElementsGui {
     pub midi_receiver: Option<std::sync::mpsc::Receiver<Box<dyn MidiMsg>>>,
@@ -58,15 +61,22 @@ impl eframe::App for MidiElementsGui {
         egui::TopBottomPanel::top("control").show(ctx, |ui| {
             ui.vertical(|ui| {
                 ui.heading("MidiElementsGui");
-                if ui.button("close").clicked() {
-                    if let Some(x) = &self.tx_close {
-                        x.send(false).unwrap();
-                        ctx.send_viewport_cmd(ViewportCommand::Close)
-                    };
-                }
-                if ui.button("export as json").clicked() {
-                    println!("n.i.y");
-                }
+                ui.horizontal(|ui| {
+                    if ui.button("close").clicked() {
+                        if let Some(x) = &self.tx_close {
+                            x.send(false).unwrap();
+                            ctx.send_viewport_cmd(ViewportCommand::Close)
+                        };
+                    }
+                    let mut json_path = "".to_string();
+                    let _ = ui.add(egui::TextEdit::singleline(&mut json_path));
+                    if ui.button("export as json").clicked() {
+                        let _path = PathBuf::from(json_path);
+                        let json_output =
+                            serde_json::to_string(&self.midi_functions_with_elements_ids).unwrap();
+                        println!("{}", json_output);
+                    }
+                });
             });
         });
         // show list of offered midi functions
