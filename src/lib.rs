@@ -19,4 +19,5 @@ pub mod jackmidi;
 pub mod jackprocess;
 pub mod midi_egui_elements;
 pub mod midi_function;
+pub mod controll_element;
 pub mod util;
