@@ -83,7 +83,7 @@ impl eframe::App for MidiElementsGui {
         egui::CentralPanel::default().show(ctx, |ui| {
             for midi_function in self.midi_functions.iter() {
                 if ui.button(format!("{}", midi_function)).clicked() {
-                    let midi_function_cpy = midi_function.clone();
+                    let midi_function_cpy = (*midi_function).clone();
                     self.selected_midi_function = Some(midi_function_cpy);
                 }
             }
