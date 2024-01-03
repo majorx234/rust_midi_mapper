@@ -20,6 +20,11 @@ use std::convert::From;
 
 const MAX_MIDI: usize = 3;
 
+pub enum MidiMsgAdvanced {
+    MidiNoteOnOff(u16, u16),
+    MidiControlIdValue(u16, u16),
+}
+
 pub trait MidiMsg: Send + std::fmt::Display {
     fn type_of(&self) -> &str;
     fn get_data(&self) -> Vec<u8>;
