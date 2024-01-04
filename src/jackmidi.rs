@@ -19,10 +19,12 @@ use crate::util::*;
 use std::convert::From;
 
 const MAX_MIDI: usize = 3;
+type MidiId = u16;
 
 pub enum MidiMsgAdvanced {
-    MidiNoteOnOff(u16, u16),
-    MidiControlIdValue(u16, u16),
+    MidiNoteOnOff(MidiId, MidiId, bool),
+    MidiControlIdValue(MidiId, u16),
+    MidiControl2IdsValue(MidiId, MidiId, u16),
 }
 
 pub trait MidiMsg: Send + std::fmt::Display {
