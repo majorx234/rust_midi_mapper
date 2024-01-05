@@ -27,6 +27,42 @@ pub enum MidiMsgAdvanced {
     MidiControl2IdsValue(MidiId, MidiId, u16),
 }
 
+impl MidiMsgAdvanced {
+    fn from_midi_msg_cc(midi_msg: MidiMsgControlChange) -> Self {
+        let midi_id = midi_msg.get_id();
+        let midi_value = midi_msg.get_value();
+        MidiMsgAdvanced::MidiControlIdValue(midi_id, midi_value)
+    }
+
+    fn from_midi_msg_cc2ids(
+        midi_msg0: MidiMsgControlChange,
+        midi_msg1: MidiMsgControlChange,
+    ) -> Self {
+        let midi_id0 = midi_msg0.get_id();
+        let midi_id1 = midi_msg1.get_id();
+
+        let midi_value = 128 * midi_msg0.get_value() + midi_msg1.get_value();
+
+        MidiMsgAdvanced::MidiControl2IdsValue(midi_id0, midi_id1, midi_value)
+    }
+
+    fn from_midi_msgs_note_on(midi_msg: MidiMsgNoteOn) -> Self {
+        let midi_id_on = midi_msg.get_id();
+        let midi_value = true;
+        let midi_id_off = midi_id_on - 0x1000;
+
+        MidiMsgAdvanced::MidiNoteOnOff(midi_id_on, midi_id_off, midi_value)
+    }
+
+    fn from_midi_msgs_note_off(midi_msg: MidiMsgNoteOff) -> Self {
+        let midi_id_on = midi_msg.get_id() + 0x1000;
+        let midi_value = false;
+        let midi_id_off = midi_msg.get_id();
+
+        MidiMsgAdvanced::MidiNoteOnOff(midi_id_on, midi_id_off, midi_value)
+    }
+}
+
 pub trait MidiMsg: Send + std::fmt::Display {
     fn type_of(&self) -> &str;
     fn get_data(&self) -> Vec<u8>;
