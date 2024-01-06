@@ -30,7 +30,7 @@ pub enum MidiMsgAdvanced {
 impl MidiMsgAdvanced {
     fn from_midi_msg_cc(midi_msg: MidiMsgControlChange) -> Self {
         let midi_id = midi_msg.get_id();
-        let midi_value = midi_msg.get_value();
+        let midi_value = 128 * midi_msg.get_value();
         MidiMsgAdvanced::MidiControlIdValue(midi_id, midi_value)
     }
 
