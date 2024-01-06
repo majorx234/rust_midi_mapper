@@ -19,7 +19,7 @@ use eframe::egui::{self, ScrollArea, ViewportCommand};
 use midi_mapper::{
     jackmidi::{MidiMsg, MidiMsgAdvanced},
     midi_egui_elements::midi_id_value_indicator,
-    midi_egui_elements::midi_status_indicator,
+    midi_egui_elements::{midi_note_status_indicator, midi_status_indicator},
     midi_function::MidiFunction,
 };
 use std::{
@@ -129,7 +129,10 @@ impl eframe::App for MidiElementsGui {
                                 if let MidiMsgAdvanced::MidiNoteOnOff(id0, id1, value) =
                                     midi_advanced_msg
                                 {
-                                    if ui.add(midi_status_indicator(&value)).clicked() {
+                                    if ui
+                                        .add(midi_note_status_indicator(*id0 as u32, &value))
+                                        .clicked()
+                                    {
                                         if let Some(selected_midi_function) =
                                             self.selected_midi_function
                                         {
