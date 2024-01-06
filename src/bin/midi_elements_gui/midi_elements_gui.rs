@@ -17,7 +17,10 @@
 
 use eframe::egui::{self, ScrollArea, ViewportCommand};
 use midi_mapper::{
-    jackmidi::MidiMsg, midi_egui_elements::midi_id_value_indicator, midi_function::MidiFunction,
+    jackmidi::{MidiMsg, MidiMsgAdvanced},
+    midi_egui_elements::midi_id_value_indicator,
+    midi_egui_elements::midi_status_indicator,
+    midi_function::MidiFunction,
 };
 use std::{
     collections::{HashMap, HashSet},
@@ -31,7 +34,7 @@ pub struct MidiElementsGui {
     pub n_items: usize,
     pub midi_functions: HashSet<MidiFunction>,
     pub midi_functions_with_elements_ids: HashMap<MidiFunction, Vec<u16>>,
-    pub midi_elements_map: HashMap<u16, u16>,
+    pub midi_elements_map: HashMap<u16, MidiMsgAdvanced>,
     pub selected_midi_function: Option<MidiFunction>,
 }
 
@@ -52,10 +55,24 @@ impl Default for MidiElementsGui {
 
 impl eframe::App for MidiElementsGui {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let mut received_midi_msgs = Vec::new();
         if let Some(ref midi_receiver) = self.midi_receiver {
+            let check_14bit_double_midi_msgs_map: HashMap<u16, MidiMsgAdvanced> = HashMap::new();
             while let Ok(m) = midi_receiver.try_recv() {
-                received_midi_msgs.push(m);
+                let mut id = m.get_id();
+                let midi_advanced_msg = match m.type_of() {
+                    "MidiMsgControlChange" => {
+                        Some(MidiMsgAdvanced::MidiControlIdValue(id, m.get_value()))
+                    }
+                    "MidiMsgNoteOn" => Some(MidiMsgAdvanced::MidiNoteOnOff(id, id - 0x1000, true)),
+                    "MidiMsgNoteOff" => {
+                        id = id + 0x1000;
+                        Some(MidiMsgAdvanced::MidiNoteOnOff(id, id - 0x1000, false))
+                    }
+                    _ => None,
+                };
+                if let Some(midi_advanced_msg) = midi_advanced_msg {
+                    self.midi_elements_map.insert(id, midi_advanced_msg);
+                }
             }
         }
         egui::TopBottomPanel::top("control").show(ctx, |ui| {
@@ -95,12 +112,6 @@ impl eframe::App for MidiElementsGui {
             let window_height = window_rect.height();
 
             ui.vertical(|ui| {
-                for msg in received_midi_msgs {
-                    let id = msg.get_id();
-                    let value = msg.get_value();
-                    self.midi_elements_map.insert(id, value);
-                }
-
                 self.n_items = self.midi_elements_map.len();
                 let text_style = egui::TextStyle::Body;
                 let row_height = ui.text_style_height(&text_style);
@@ -111,20 +122,43 @@ impl eframe::App for MidiElementsGui {
                     .min_scrolled_width(window_width - 40.0)
                     .max_width(window_width - 40.0)
                     .show_rows(ui, row_height, self.n_items, |ui, row_range| {
-                        for (row, (key, value)) in self.midi_elements_map.iter().enumerate() {
+                        for (row, (key, midi_advanced_msg)) in
+                            self.midi_elements_map.iter().enumerate()
+                        {
                             if row_range.contains(&row) {
-                                if ui
-                                    .add(midi_id_value_indicator(*key as u32, *value as u32))
-                                    .clicked()
+                                if let MidiMsgAdvanced::MidiNoteOnOff(id0, id1, value) =
+                                    midi_advanced_msg
                                 {
-                                    if let Some(selected_midi_function) =
-                                        self.selected_midi_function
-                                    {
-                                        if let Some(ref mut midi_elements_id) = self
-                                            .midi_functions_with_elements_ids
-                                            .get_mut(&selected_midi_function)
+                                    if ui.add(midi_status_indicator(&value)).clicked() {
+                                        if let Some(selected_midi_function) =
+                                            self.selected_midi_function
                                         {
-                                            midi_elements_id.push(*key);
+                                            if let Some(ref mut midi_elements_id) = self
+                                                .midi_functions_with_elements_ids
+                                                .get_mut(&selected_midi_function)
+                                            {
+                                                midi_elements_id.push(*key);
+                                            }
+                                        }
+                                    }
+                                };
+
+                                if let MidiMsgAdvanced::MidiControlIdValue(id, value) =
+                                    midi_advanced_msg
+                                {
+                                    if ui
+                                        .add(midi_id_value_indicator(*key as u32, *value as u32))
+                                        .clicked()
+                                    {
+                                        if let Some(selected_midi_function) =
+                                            self.selected_midi_function
+                                        {
+                                            if let Some(ref mut midi_elements_id) = self
+                                                .midi_functions_with_elements_ids
+                                                .get_mut(&selected_midi_function)
+                                            {
+                                                midi_elements_id.push(*key);
+                                            }
                                         }
                                     }
                                 }
