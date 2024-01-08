@@ -68,6 +68,7 @@ pub trait MidiMsg: Send + std::fmt::Display {
     fn get_data(&self) -> Vec<u8>;
     fn get_id(&self) -> u16;
     fn get_value(&self) -> u16;
+    fn get_time(&self) -> u64;
 }
 
 //a fixed size container to copy data out of real-time thread
@@ -90,6 +91,9 @@ impl MidiMsg for MidiMsgGeneric {
     }
     fn get_value(&self) -> u16 {
         0
+    }
+    fn get_time(&self) -> u64 {
+        self.time
     }
 }
 
@@ -138,6 +142,9 @@ impl MidiMsg for MidiMsgControlChange {
     fn get_value(&self) -> u16 {
         self.value as u16
     }
+    fn get_time(&self) -> u64 {
+        self.time
+    }
 }
 
 impl std::fmt::Debug for MidiMsgControlChange {
@@ -179,6 +186,9 @@ impl MidiMsg for MidiMsgNoteOn {
     }
     fn get_value(&self) -> u16 {
         self.velocity as u16
+    }
+    fn get_time(&self) -> u64 {
+        self.time
     }
 }
 
@@ -222,6 +232,9 @@ impl MidiMsg for MidiMsgNoteOff {
     fn get_value(&self) -> u16 {
         self.velocity as u16
     }
+    fn get_time(&self) -> u64 {
+        self.time
+    }
 }
 
 impl std::fmt::Debug for MidiMsgNoteOff {
@@ -263,6 +276,9 @@ impl MidiMsg for MidiMsgPitchBend {
     }
     fn get_value(&self) -> u16 {
         0
+    }
+    fn get_time(&self) -> u64 {
+        self.time
     }
 }
 
