@@ -50,6 +50,7 @@ fn main() {
         midi_functions_with_elements_ids,
         midi_elements_map: HashMap::new(),
         selected_midi_function: None,
+        last_midi_msg: None,
     };
 
     let options = eframe::NativeOptions {

@@ -36,6 +36,7 @@ pub struct MidiElementsGui {
     pub midi_functions_with_elements_ids: HashMap<MidiFunction, Vec<u16>>,
     pub midi_elements_map: HashMap<u16, MidiMsgAdvanced>,
     pub selected_midi_function: Option<MidiFunction>,
+    pub last_midi_msg: Option<Box<dyn MidiMsg>>,
 }
 
 impl Default for MidiElementsGui {
@@ -49,6 +50,7 @@ impl Default for MidiElementsGui {
             midi_functions_with_elements_ids: HashMap::new(),
             midi_elements_map: HashMap::new(),
             selected_midi_function: None,
+            last_midi_msg: None,
         }
     }
 }
@@ -58,15 +60,38 @@ impl eframe::App for MidiElementsGui {
         if let Some(ref midi_receiver) = self.midi_receiver {
             let check_14bit_double_midi_msgs_map: HashMap<u16, MidiMsgAdvanced> = HashMap::new();
             while let Ok(m) = midi_receiver.try_recv() {
-                let mut id = m.get_id();
-                let midi_advanced_msg = match m.type_of() {
+                let id = m.get_id();
+                let last_last_midi_msg = self.last_midi_msg.take();
+                let midi_msg_value = m.get_value();
+                let midi_msg_type = m.type_of().to_string();
+                let midi_msg_timestamp = m.get_time();
+                let mut id_value_time_diff_to_last_msg = None;
+                if let Some(last_last_midi_msg) = last_last_midi_msg {
+                    let time_diff = midi_msg_timestamp.abs_diff(last_last_midi_msg.get_time());
+                    let last_id = last_last_midi_msg.get_id();
+                    let last_value = last_last_midi_msg.get_value();
+                    if time_diff < 10 && id > last_id {
+                        id_value_time_diff_to_last_msg = Some((last_id, last_value, time_diff));
+                    }
+                }
+                self.last_midi_msg = Some(m);
+                let midi_advanced_msg = match midi_msg_type.as_str() {
                     "MidiMsgControlChange" => {
-                        Some(MidiMsgAdvanced::MidiControlIdValue(id, m.get_value()))
+                        if let Some((last_id, last_value, time_diff)) =
+                            id_value_time_diff_to_last_msg
+                        {
+                            Some(MidiMsgAdvanced::MidiControl2IdsValue(
+                                last_id,
+                                id,
+                                midi_msg_value + last_value * 128,
+                            ))
+                        } else {
+                            Some(MidiMsgAdvanced::MidiControlIdValue(id, midi_msg_value))
+                        }
                     }
                     "MidiMsgNoteOn" => Some(MidiMsgAdvanced::MidiNoteOnOff(id, id - 0x1000, true)),
                     "MidiMsgNoteOff" => {
-                        id = id + 0x1000;
-                        Some(MidiMsgAdvanced::MidiNoteOnOff(id, id - 0x1000, false))
+                        Some(MidiMsgAdvanced::MidiNoteOnOff(id + 0x1000, id, false))
                     }
                     _ => None,
                 };
@@ -147,6 +172,25 @@ impl eframe::App for MidiElementsGui {
                                 };
 
                                 if let MidiMsgAdvanced::MidiControlIdValue(id, value) =
+                                    midi_advanced_msg
+                                {
+                                    if ui
+                                        .add(midi_id_value_indicator(*key as u32, *value as u32))
+                                        .clicked()
+                                    {
+                                        if let Some(selected_midi_function) =
+                                            self.selected_midi_function
+                                        {
+                                            if let Some(ref mut midi_elements_id) = self
+                                                .midi_functions_with_elements_ids
+                                                .get_mut(&selected_midi_function)
+                                            {
+                                                midi_elements_id.push(*key);
+                                            }
+                                        }
+                                    }
+                                }
+                                if let MidiMsgAdvanced::MidiControl2IdsValue(id0, id1, value) =
                                     midi_advanced_msg
                                 {
                                     if ui
