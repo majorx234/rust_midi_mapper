@@ -89,13 +89,10 @@ fn midi_value_indicator_ui(ui: &mut egui::Ui, value: u32) -> egui::Response {
 }
 
 fn midi_note_status_indicator_ui(ui: &mut egui::Ui, id: u32, status: &bool) -> egui::Response {
-    let desired_size = ui.spacing().interact_size.y * egui::vec2(2.0, 1.0);
-    let (_rect, _response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
-
     let width = 8.0;
     let height = 1.0;
     let desired_size = ui.spacing().interact_size.y * egui::vec2(width, height);
-    let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::hover());
+    let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
     //TODO implement painter
     if ui.is_rect_visible(response.rect) {
         let mut how_on = ui.ctx().animate_bool(response.id, *status);
