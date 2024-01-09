@@ -62,7 +62,7 @@ impl eframe::App for MidiElementsGui {
         if let Some(ref midi_receiver) = self.midi_receiver {
             let check_14bit_double_midi_msgs_map: HashMap<u16, MidiMsgAdvanced> = HashMap::new();
             while let Ok(m) = midi_receiver.try_recv() {
-                let id = m.get_id();
+                let mut id = m.get_id();
                 let last_last_midi_msg = self.last_midi_msg.take();
                 let midi_msg_value = m.get_value();
                 let midi_msg_type = m.type_of().to_string();
@@ -79,7 +79,7 @@ impl eframe::App for MidiElementsGui {
                 self.last_midi_msg = Some(m);
                 let midi_advanced_msg = match midi_msg_type.as_str() {
                     "MidiMsgControlChange" => {
-                        if let Some((last_id, last_value, time_diff)) =
+                        if let Some((last_id, last_value, _time_diff)) =
                             id_value_time_diff_to_last_msg
                         {
                             Some(MidiMsgAdvanced::MidiControl2IdsValue(
@@ -93,7 +93,8 @@ impl eframe::App for MidiElementsGui {
                     }
                     "MidiMsgNoteOn" => Some(MidiMsgAdvanced::MidiNoteOnOff(id, id - 0x1000, true)),
                     "MidiMsgNoteOff" => {
-                        Some(MidiMsgAdvanced::MidiNoteOnOff(id + 0x1000, id, false))
+                        id += 0x1000;
+                        Some(MidiMsgAdvanced::MidiNoteOnOff(id, id - 0x1000, false))
                     }
                     _ => None,
                 };
