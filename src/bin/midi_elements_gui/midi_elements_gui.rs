@@ -98,6 +98,11 @@ impl eframe::App for MidiElementsGui {
                         id += 0x1000;
                         Some(MidiMsgAdvanced::MidiNoteOnOff(id, id - 0x1000, false))
                     }
+                    "MidiMsgPitchBend" => Some(MidiMsgAdvanced::MidiControl2IdsValue(
+                        id,
+                        id,
+                        midi_msg_value,
+                    )),
                     _ => None,
                 };
                 if let Some(midi_advanced_msg) = midi_advanced_msg {

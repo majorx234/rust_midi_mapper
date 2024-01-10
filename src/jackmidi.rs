@@ -277,7 +277,7 @@ impl MidiMsg for MidiMsgPitchBend {
         0xE000 + ((self.channel as u16) << 8)
     }
     fn get_value(&self) -> u16 {
-        0
+        self.value
     }
     fn get_time(&self) -> u64 {
         self.time
