@@ -51,6 +51,7 @@ fn main() {
         midi_elements_map: HashMap::new(),
         selected_midi_function: None,
         last_midi_msg: None,
+        num_detected_midi_ids: 0,
     };
 
     let options = eframe::NativeOptions {

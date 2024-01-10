@@ -36,9 +36,10 @@ pub struct MidiElementsGui {
     pub n_items: usize,
     pub midi_functions: HashSet<MidiFunction>,
     pub midi_functions_with_elements_ids: HashMap<MidiFunction, Vec<u16>>,
-    pub midi_elements_map: HashMap<u16, MidiMsgAdvanced>,
+    pub midi_elements_map: HashMap<u16, (usize, MidiMsgAdvanced)>,
     pub selected_midi_function: Option<MidiFunction>,
     pub last_midi_msg: Option<Box<dyn MidiMsg>>,
+    pub num_detected_midi_ids: usize,
 }
 
 impl Default for MidiElementsGui {
@@ -53,6 +54,7 @@ impl Default for MidiElementsGui {
             midi_elements_map: HashMap::new(),
             selected_midi_function: None,
             last_midi_msg: None,
+            num_detected_midi_ids: 0,
         }
     }
 }
@@ -99,7 +101,15 @@ impl eframe::App for MidiElementsGui {
                     _ => None,
                 };
                 if let Some(midi_advanced_msg) = midi_advanced_msg {
-                    self.midi_elements_map.insert(id, midi_advanced_msg);
+                    println!("self.num_detected_midi_ids: {}", self.num_detected_midi_ids);
+                    if let Some((detection_number, _)) = self.midi_elements_map.get(&id) {
+                        self.midi_elements_map
+                            .insert(id, (*detection_number, midi_advanced_msg));
+                    } else {
+                        self.midi_elements_map
+                            .insert(id, (self.num_detected_midi_ids, midi_advanced_msg));
+                        self.num_detected_midi_ids += 1;
+                    }
                 }
             }
         }
@@ -128,11 +138,22 @@ impl eframe::App for MidiElementsGui {
         egui::CentralPanel::default().show(ctx, |ui| {
             for midi_function in self.midi_functions.iter() {
                 if ui.button(format!("{}", midi_function)).clicked() {
-                    let midi_function_cpy = (*midi_function).clone();
+                    let midi_function_cpy = *midi_function;
                     self.selected_midi_function = Some(midi_function_cpy);
                 }
             }
         });
+        let len_hashmap = self.midi_elements_map.len();
+        let mut midi_elements_vec: Vec<(u16, MidiMsgAdvanced)> =
+            vec![(0, MidiMsgAdvanced::MidiEmpty); len_hashmap];
+        for (key, (detection_number, midi_advanced_msg)) in self.midi_elements_map.iter() {
+            println!(
+                "len: {} detection_number: {}, key: {}",
+                len_hashmap, *detection_number, *key
+            );
+            midi_elements_vec[*detection_number] = (*key, *midi_advanced_msg);
+        }
+
         // show list of Midi events
         egui::SidePanel::right("midi id events").show(ctx, |ui| {
             let window_rect = ctx.input(|i| i.viewport().outer_rect).unwrap();
@@ -150,8 +171,7 @@ impl eframe::App for MidiElementsGui {
                     .min_scrolled_width(window_width - 40.0)
                     .max_width(window_width - 40.0)
                     .show_rows(ui, row_height, self.n_items, |ui, row_range| {
-                        for (row, (key, midi_advanced_msg)) in
-                            self.midi_elements_map.iter().enumerate()
+                        for (row, (key, midi_advanced_msg)) in midi_elements_vec.iter().enumerate()
                         {
                             if row_range.contains(&row) {
                                 if let MidiMsgAdvanced::MidiNoteOnOff(id0, id1, value) =
