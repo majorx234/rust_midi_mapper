@@ -101,7 +101,6 @@ impl eframe::App for MidiElementsGui {
                     _ => None,
                 };
                 if let Some(midi_advanced_msg) = midi_advanced_msg {
-                    println!("self.num_detected_midi_ids: {}", self.num_detected_midi_ids);
                     if let Some((detection_number, _)) = self.midi_elements_map.get(&id) {
                         self.midi_elements_map
                             .insert(id, (*detection_number, midi_advanced_msg));
@@ -147,10 +146,6 @@ impl eframe::App for MidiElementsGui {
         let mut midi_elements_vec: Vec<(u16, MidiMsgAdvanced)> =
             vec![(0, MidiMsgAdvanced::MidiEmpty); len_hashmap];
         for (key, (detection_number, midi_advanced_msg)) in self.midi_elements_map.iter() {
-            println!(
-                "len: {} detection_number: {}, key: {}",
-                len_hashmap, *detection_number, *key
-            );
             midi_elements_vec[*detection_number] = (*key, *midi_advanced_msg);
         }
 
