@@ -30,13 +30,13 @@ pub enum MidiMsgAdvanced {
 }
 
 impl MidiMsgAdvanced {
-    fn from_midi_msg_cc(midi_msg: MidiMsgControlChange) -> Self {
+    pub fn from_midi_msg_cc(midi_msg: MidiMsgControlChange) -> Self {
         let midi_id = midi_msg.get_id();
         let midi_value = 128 * midi_msg.get_value();
         MidiMsgAdvanced::MidiControlIdValue(midi_id, midi_value)
     }
 
-    fn from_midi_msg_cc2ids(
+    pub fn from_midi_msg_cc2ids(
         midi_msg0: MidiMsgControlChange,
         midi_msg1: MidiMsgControlChange,
     ) -> Self {
@@ -48,7 +48,7 @@ impl MidiMsgAdvanced {
         MidiMsgAdvanced::MidiControl2IdsValue(midi_id0, midi_id1, midi_value)
     }
 
-    fn from_midi_msgs_note_on(midi_msg: MidiMsgNoteOn) -> Self {
+    pub fn from_midi_msgs_note_on(midi_msg: MidiMsgNoteOn) -> Self {
         let midi_id_on = midi_msg.get_id();
         let midi_value = true;
         let midi_id_off = midi_id_on - 0x1000;
@@ -56,12 +56,56 @@ impl MidiMsgAdvanced {
         MidiMsgAdvanced::MidiNoteOnOff(midi_id_on, midi_id_off, midi_value)
     }
 
-    fn from_midi_msgs_note_off(midi_msg: MidiMsgNoteOff) -> Self {
+    pub fn from_midi_msgs_note_off(midi_msg: MidiMsgNoteOff) -> Self {
         let midi_id_on = midi_msg.get_id() + 0x1000;
         let midi_value = false;
         let midi_id_off = midi_msg.get_id();
 
         MidiMsgAdvanced::MidiNoteOnOff(midi_id_on, midi_id_off, midi_value)
+    }
+
+    pub fn from_current_and_last_opt_midi_msgs(
+        (current_midi_msg, last_opt_midi_msg): (Box<dyn MidiMsg>, &mut Option<Box<dyn MidiMsg>>),
+    ) -> Option<Self> {
+        let mut id = current_midi_msg.get_id();
+        let last_last_midi_msg = last_opt_midi_msg.take();
+        let midi_msg_value = current_midi_msg.get_value();
+        let midi_msg_type = current_midi_msg.type_of().to_string();
+        let midi_msg_timestamp = current_midi_msg.get_time();
+        let mut id_value_time_diff_to_last_msg = None;
+        if let Some(last_last_midi_msg) = last_last_midi_msg {
+            let time_diff = midi_msg_timestamp.abs_diff(last_last_midi_msg.get_time());
+            let last_id = last_last_midi_msg.get_id();
+            let last_value = last_last_midi_msg.get_value();
+            if time_diff < 10 && id > last_id {
+                id_value_time_diff_to_last_msg = Some((last_id, last_value, time_diff));
+            }
+        }
+        *last_opt_midi_msg = Some(current_midi_msg);
+        match midi_msg_type.as_str() {
+            "MidiMsgControlChange" => {
+                if let Some((last_id, last_value, _time_diff)) = id_value_time_diff_to_last_msg {
+                    Some(MidiMsgAdvanced::MidiControl2IdsValue(
+                        last_id,
+                        id,
+                        midi_msg_value + last_value * 128,
+                    ))
+                } else {
+                    Some(MidiMsgAdvanced::MidiControlIdValue(id, midi_msg_value))
+                }
+            }
+            "MidiMsgNoteOn" => Some(MidiMsgAdvanced::MidiNoteOnOff(id, id - 0x1000, true)),
+            "MidiMsgNoteOff" => {
+                id += 0x1000;
+                Some(MidiMsgAdvanced::MidiNoteOnOff(id, id - 0x1000, false))
+            }
+            "MidiMsgPitchBend" => Some(MidiMsgAdvanced::MidiControl2IdsValue(
+                id,
+                id,
+                midi_msg_value,
+            )),
+            _ => None,
+        }
     }
 }
 

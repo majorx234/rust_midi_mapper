@@ -19,9 +19,7 @@ use eframe::egui::{self, ScrollArea, ViewportCommand};
 use midi_mapper::{
     jackmidi::{MidiMsg, MidiMsgAdvanced},
     midi_egui_elements::midi_id_value_indicator,
-    midi_egui_elements::{
-        midi_id_double_precision_value_indicator, midi_note_status_indicator, midi_status_indicator,
-    },
+    midi_egui_elements::{midi_id_double_precision_value_indicator, midi_note_status_indicator},
     midi_function::MidiFunction,
 };
 use std::{
@@ -62,49 +60,12 @@ impl Default for MidiElementsGui {
 impl eframe::App for MidiElementsGui {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if let Some(ref midi_receiver) = self.midi_receiver {
-            let check_14bit_double_midi_msgs_map: HashMap<u16, MidiMsgAdvanced> = HashMap::new();
-            while let Ok(m) = midi_receiver.try_recv() {
-                let mut id = m.get_id();
-                let last_last_midi_msg = self.last_midi_msg.take();
-                let midi_msg_value = m.get_value();
-                let midi_msg_type = m.type_of().to_string();
-                let midi_msg_timestamp = m.get_time();
-                let mut id_value_time_diff_to_last_msg = None;
-                if let Some(last_last_midi_msg) = last_last_midi_msg {
-                    let time_diff = midi_msg_timestamp.abs_diff(last_last_midi_msg.get_time());
-                    let last_id = last_last_midi_msg.get_id();
-                    let last_value = last_last_midi_msg.get_value();
-                    if time_diff < 10 && id > last_id {
-                        id_value_time_diff_to_last_msg = Some((last_id, last_value, time_diff));
-                    }
-                }
-                self.last_midi_msg = Some(m);
-                let midi_advanced_msg = match midi_msg_type.as_str() {
-                    "MidiMsgControlChange" => {
-                        if let Some((last_id, last_value, _time_diff)) =
-                            id_value_time_diff_to_last_msg
-                        {
-                            Some(MidiMsgAdvanced::MidiControl2IdsValue(
-                                last_id,
-                                id,
-                                midi_msg_value + last_value * 128,
-                            ))
-                        } else {
-                            Some(MidiMsgAdvanced::MidiControlIdValue(id, midi_msg_value))
-                        }
-                    }
-                    "MidiMsgNoteOn" => Some(MidiMsgAdvanced::MidiNoteOnOff(id, id - 0x1000, true)),
-                    "MidiMsgNoteOff" => {
-                        id += 0x1000;
-                        Some(MidiMsgAdvanced::MidiNoteOnOff(id, id - 0x1000, false))
-                    }
-                    "MidiMsgPitchBend" => Some(MidiMsgAdvanced::MidiControl2IdsValue(
-                        id,
-                        id,
-                        midi_msg_value,
-                    )),
-                    _ => None,
-                };
+            while let Ok(current_midi_msg) = midi_receiver.try_recv() {
+                let id = current_midi_msg.get_id();
+                let midi_advanced_msg = MidiMsgAdvanced::from_current_and_last_opt_midi_msgs((
+                    current_midi_msg,
+                    &mut self.last_midi_msg,
+                ));
                 if let Some(midi_advanced_msg) = midi_advanced_msg {
                     if let Some((detection_number, _)) = self.midi_elements_map.get(&id) {
                         self.midi_elements_map
@@ -174,7 +135,7 @@ impl eframe::App for MidiElementsGui {
                         for (row, (key, midi_advanced_msg)) in midi_elements_vec.iter().enumerate()
                         {
                             if row_range.contains(&row) {
-                                if let MidiMsgAdvanced::MidiNoteOnOff(id0, id1, value) =
+                                if let MidiMsgAdvanced::MidiNoteOnOff(id0, _id1, value) =
                                     midi_advanced_msg
                                 {
                                     if ui
@@ -198,7 +159,7 @@ impl eframe::App for MidiElementsGui {
                                     midi_advanced_msg
                                 {
                                     if ui
-                                        .add(midi_id_value_indicator(*key as u32, *value as u32))
+                                        .add(midi_id_value_indicator(*id as u32, *value as u32))
                                         .clicked()
                                     {
                                         if let Some(selected_midi_function) =
@@ -213,12 +174,12 @@ impl eframe::App for MidiElementsGui {
                                         }
                                     }
                                 }
-                                if let MidiMsgAdvanced::MidiControl2IdsValue(id0, id1, value) =
+                                if let MidiMsgAdvanced::MidiControl2IdsValue(id0, _id1, value) =
                                     midi_advanced_msg
                                 {
                                     if ui
                                         .add(midi_id_double_precision_value_indicator(
-                                            *key as u32,
+                                            *id0 as u32,
                                             *value as u32,
                                         ))
                                         .clicked()
