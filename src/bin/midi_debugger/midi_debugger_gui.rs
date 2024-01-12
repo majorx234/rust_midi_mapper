@@ -77,9 +77,8 @@ impl eframe::App for MidiDebuggerGui {
                             }
                         }
                     });
-
-                ui.ctx().request_repaint();
             });
         });
+        ctx.request_repaint();
     }
 }
