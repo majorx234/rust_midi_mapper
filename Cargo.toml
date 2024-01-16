@@ -22,3 +22,4 @@ crossbeam-channel = "0.5.8"
 eframe = { version = "0.24.1"}
 serde = { version = "1.0.193" }
 serde_json = { version = "1.0.108"}
+clap = { version = "4.4.16", features = ["derive"]}
