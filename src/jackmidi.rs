@@ -30,6 +30,17 @@ pub enum MidiMsgAdvanced {
 }
 
 impl MidiMsgAdvanced {
+    pub fn get_id(&self) -> u16 {
+        match self {
+            Self::MidiEmpty => 0,
+            Self::MidiNoteOnOff(id0, _, _) => *id0,
+            Self::MidiControlIdValue(id, _) => *id,
+            Self::MidiControl2IdsValue(id0, _, _) => *id0,
+        }
+    }
+}
+
+impl MidiMsgAdvanced {
     pub fn from_midi_msg_cc(midi_msg: MidiMsgControlChange) -> Self {
         let midi_id = midi_msg.get_id();
         let midi_value = 128 * midi_msg.get_value();

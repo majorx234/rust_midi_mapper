@@ -61,12 +61,12 @@ impl eframe::App for MidiElementsGui {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if let Some(ref midi_receiver) = self.midi_receiver {
             while let Ok(current_midi_msg) = midi_receiver.try_recv() {
-                let id = current_midi_msg.get_id();
                 let midi_advanced_msg = MidiMsgAdvanced::from_current_and_last_opt_midi_msgs((
                     current_midi_msg,
                     &mut self.last_midi_msg,
                 ));
                 if let Some(midi_advanced_msg) = midi_advanced_msg {
+                    let id = midi_advanced_msg.get_id();
                     if let Some((detection_number, _)) = self.midi_elements_map.get(&id) {
                         self.midi_elements_map
                             .insert(id, (*detection_number, midi_advanced_msg));
