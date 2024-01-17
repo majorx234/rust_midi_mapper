@@ -10,6 +10,10 @@
 - add drag&drop functionality
 - add other output formates for MIXXX & Equis
 
+# usage (WIP not usable yet!)
+- ```target/release/midi_elements_gui -f test_midi_functions.json```
+  - use config file with function names
+
 # References
 - taken util from:
   - https://github.com/samdoshi/midi-rs/tree/master

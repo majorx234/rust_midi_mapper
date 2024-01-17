@@ -1,8 +1,8 @@
 {
     "midi_functions":[
-        "Volume",
-        "Modulate",
-        "FmIntensity",
-        "AmIntensity"
+        {"name": "Volume"},
+        {"name": "Modulate"},
+        {"name": "FmIntensity"},
+        {"name": "AmIntensity"}
   ]
 }
