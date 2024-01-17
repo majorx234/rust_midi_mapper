@@ -54,28 +54,22 @@ fn main() {
             midi_functions
         } else {
             MidiFunctionFile {
-                midi_functions: vec![
-                    MidiFunction::Volume,
-                    MidiFunction::Modulate,
-                    MidiFunction::FmIntensity,
-                ],
+                midi_functions: vec![],
             }
         }
     } else {
         MidiFunctionFile {
             midi_functions: vec![
-                MidiFunction::Volume,
-                MidiFunction::Modulate,
-                MidiFunction::FmIntensity,
+                MidiFunction::new("Volume".to_string()),
+                MidiFunction::new("Modulate".to_string()),
+                MidiFunction::new("FmIntensity".to_string()),
             ],
         }
     };
-    let mut midi_functions_with_elements_ids: HashMap<MidiFunction, Vec<u16>> = HashMap::new();
-    midi_functions_with_elements_ids.insert(MidiFunction::Volume, Vec::new());
-    midi_functions_with_elements_ids.insert(MidiFunction::Modulate, Vec::new());
-    midi_functions_with_elements_ids.insert(MidiFunction::FmIntensity, Vec::new());
     let mut midi_functions_set = HashSet::new();
+    let mut midi_functions_with_elements_ids: HashMap<String, Vec<u16>> = HashMap::new();
     for midi_function in midi_functions.midi_functions.into_iter() {
+        midi_functions_with_elements_ids.insert(midi_function.get_name(), Vec::new());
         midi_functions_set.insert(midi_function);
     }
     let midi_elements_gui = MidiElementsGui {

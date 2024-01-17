@@ -8,7 +8,7 @@ pub enum Scaling {
     EXPONETIONAL,
 }
 
-#[derive(Eq, PartialEq, Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Eq, PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub struct ControllElement {
     pub midi_function: MidiFunction,
     pub invert: bool,

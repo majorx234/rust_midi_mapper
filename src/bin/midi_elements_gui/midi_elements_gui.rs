@@ -33,9 +33,9 @@ pub struct MidiElementsGui {
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub n_items: usize,
     pub midi_functions: HashSet<MidiFunction>,
-    pub midi_functions_with_elements_ids: HashMap<MidiFunction, Vec<u16>>,
+    pub midi_functions_with_elements_ids: HashMap<String, Vec<u16>>,
     pub midi_elements_map: HashMap<u16, (usize, MidiMsgAdvanced)>,
-    pub selected_midi_function: Option<MidiFunction>,
+    pub selected_midi_function: Option<String>,
     pub last_midi_msg: Option<Box<dyn MidiMsg>>,
     pub num_detected_midi_ids: usize,
 }
@@ -103,8 +103,8 @@ impl eframe::App for MidiElementsGui {
         egui::CentralPanel::default().show(ctx, |ui| {
             for midi_function in self.midi_functions.iter() {
                 if ui.button(format!("{}", midi_function)).clicked() {
-                    let midi_function_cpy = *midi_function;
-                    self.selected_midi_function = Some(midi_function_cpy);
+                    let midi_function_name = midi_function.get_name();
+                    self.selected_midi_function = Some(midi_function_name);
                 }
             }
         });
@@ -142,12 +142,12 @@ impl eframe::App for MidiElementsGui {
                                         .add(midi_note_status_indicator(*id0 as u32, &value))
                                         .clicked()
                                     {
-                                        if let Some(selected_midi_function) =
+                                        if let Some(ref selected_midi_function) =
                                             self.selected_midi_function
                                         {
                                             if let Some(ref mut midi_elements_id) = self
                                                 .midi_functions_with_elements_ids
-                                                .get_mut(&selected_midi_function)
+                                                .get_mut(selected_midi_function)
                                             {
                                                 midi_elements_id.push(*key);
                                             }
@@ -162,12 +162,12 @@ impl eframe::App for MidiElementsGui {
                                         .add(midi_id_value_indicator(*id as u32, *value as u32))
                                         .clicked()
                                     {
-                                        if let Some(selected_midi_function) =
+                                        if let Some(ref selected_midi_function) =
                                             self.selected_midi_function
                                         {
                                             if let Some(ref mut midi_elements_id) = self
                                                 .midi_functions_with_elements_ids
-                                                .get_mut(&selected_midi_function)
+                                                .get_mut(selected_midi_function)
                                             {
                                                 midi_elements_id.push(*key);
                                             }
@@ -184,12 +184,12 @@ impl eframe::App for MidiElementsGui {
                                         ))
                                         .clicked()
                                     {
-                                        if let Some(selected_midi_function) =
+                                        if let Some(ref selected_midi_function) =
                                             self.selected_midi_function
                                         {
                                             if let Some(ref mut midi_elements_id) = self
                                                 .midi_functions_with_elements_ids
-                                                .get_mut(&selected_midi_function)
+                                                .get_mut(selected_midi_function)
                                             {
                                                 midi_elements_id.push(*key);
                                             }
@@ -206,10 +206,9 @@ impl eframe::App for MidiElementsGui {
         });
         // show list of midi events of selected midi function
         egui::SidePanel::right("midi function with ids events").show(ctx, |ui| {
-            if let Some(midi_function) = self.selected_midi_function {
-                if let Some(ref mut selected_midi_events) = self
-                    .midi_functions_with_elements_ids
-                    .get_mut(&midi_function)
+            if let Some(ref midi_function) = self.selected_midi_function {
+                if let Some(ref mut selected_midi_events) =
+                    self.midi_functions_with_elements_ids.get_mut(midi_function)
                 {
                     let mut index_to_remove: Option<usize> = None;
                     for (idx, event) in selected_midi_events.iter().enumerate() {
