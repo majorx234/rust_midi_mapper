@@ -26,14 +26,12 @@ fn midi_status_indicator_ui(ui: &mut egui::Ui, status: &bool) -> egui::Response 
             ui.painter().rect(
                 inner_rect,
                 rounding,
-                egui::Color32::from(
-                    egui::Rgba::from(visuals.selection.bg_fill) * color_factor as f32,
-                ),
+                egui::Color32::from(egui::Rgba::from(visuals.selection.bg_fill) * color_factor),
                 Stroke::NONE,
             );
         }
         let status_str = if *status { "on" } else { "off" };
-        let text: egui::WidgetText = format!("{}", status_str).into();
+        let text: egui::WidgetText = status_str.into();
         let galley = text.into_galley(ui, Some(false), f32::INFINITY, egui::TextStyle::Button);
         let text_pos = rect.left_center()
             - egui::Vec2::new(galley.size().x / 2.0, galley.size().y / 2.0)

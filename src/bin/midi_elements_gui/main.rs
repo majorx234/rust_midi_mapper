@@ -47,8 +47,7 @@ fn main() {
     ) = mpsc::sync_channel(64);
     let (tx_close, rx_close) = unbounded();
     let jack_midi_thread = start_jack_thread(rx_close, midi_sender);
-    /*
-    let midi_functions: HashSet<MidiFunction> = ;*/
+    let midi_functions = filepath.
     let midi_functions = if let Some(filepath) = filepath {
         if let Ok(midi_functions) = parse_json_file_to_midi_functions(&filepath) {
             midi_functions

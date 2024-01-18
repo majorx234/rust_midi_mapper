@@ -1,8 +1,7 @@
-use clap::error::ErrorFormatter;
 use serde::{Deserialize, Serialize};
 use std::io::Read;
 use std::result::Result;
-use std::{collections::HashSet, error::Error, fmt, fs::File};
+use std::{fmt, fs::File};
 
 #[derive(Hash, Eq, PartialEq, Serialize, Deserialize, Clone, Debug)]
 pub struct MidiFunction {
