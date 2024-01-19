@@ -26,7 +26,7 @@ impl fmt::Display for MidiFunction {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Default, Debug, Serialize, Deserialize)]
 pub struct MidiFunctionFile {
     pub midi_functions: Vec<MidiFunction>,
 }

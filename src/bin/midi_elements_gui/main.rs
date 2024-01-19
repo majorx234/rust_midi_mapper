@@ -39,31 +39,30 @@ struct Args {
 }
 
 fn main() {
-    let args = Args::parse();
-    let filepath = args.filepath;
     let (midi_sender, midi_receiver): (
         std::sync::mpsc::SyncSender<Box<dyn MidiMsg>>,
         std::sync::mpsc::Receiver<Box<dyn MidiMsg>>,
     ) = mpsc::sync_channel(64);
     let (tx_close, rx_close) = unbounded();
     let jack_midi_thread = start_jack_thread(rx_close, midi_sender);
-    let midi_functions = if let Some(filepath) = filepath {
-        if let Ok(midi_functions) = parse_json_file_to_midi_functions(&filepath) {
-            midi_functions
-        } else {
-            MidiFunctionFile {
-                midi_functions: vec![],
-            }
-        }
-    } else {
-        MidiFunctionFile {
+    let midi_functions = Args::parse().filepath.map_or_else(
+        || MidiFunctionFile {
             midi_functions: vec![
                 MidiFunction::new("Volume".to_string()),
                 MidiFunction::new("Modulate".to_string()),
                 MidiFunction::new("FmIntensity".to_string()),
             ],
-        }
-    };
+        },
+        |filepath| {
+            parse_json_file_to_midi_functions(&filepath).map_or_else(
+                |err| {
+                    println!("{err}");
+                    MidiFunctionFile::default()
+                },
+                |file_path| file_path,
+            )
+        },
+    );
     let mut midi_functions_set = HashSet::new();
     let mut midi_functions_with_elements_ids: HashMap<String, Vec<u16>> = HashMap::new();
     for midi_function in midi_functions.midi_functions.into_iter() {
