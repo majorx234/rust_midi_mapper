@@ -3,6 +3,7 @@
 - detect midi controls and their messages and map them to functions
 
 # Todo
+- implement Display trait for MidiFunctionFile
 - add configurable list of midi_functions
 - need new GUI elements to visualize different functionalities
 - add assigning function (invert, log,lin,exp-scaling)

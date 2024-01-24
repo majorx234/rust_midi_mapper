@@ -16,6 +16,10 @@ path = "src/bin/midi_debugger/main.rs"
 name = "midi_elements_gui"
 path = "src/bin/midi_elements_gui/main.rs"
 
+[[bin]]
+name = "midi_app_with_functions"
+path = "src/bin/midi_app_with_functions/main.rs"
+
 [dependencies]
 jack = "0.11.4"
 crossbeam-channel = "0.5.8"
