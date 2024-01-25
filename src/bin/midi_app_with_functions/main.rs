@@ -15,16 +15,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use std::collections::HashMap;
+use crossbeam_channel::unbounded;
+use std::{collections::HashMap, sync::mpsc};
 
 use clap::Parser;
 use midi_mapper::{
-    jackmidi::MidiMsgAdvanced,
+    jackmidi::{MidiMsg, MidiMsgAdvanced},
+    jackprocess::start_jack_thread,
     midi_function::{
         parse_json_file_to_midi_functions,
         parse_json_file_to_midi_functions_with_midi_msgs_advanced, MidiFunction, MidiFunctionFile,
     },
 };
+mod midi_app_with_functions;
+use midi_app_with_functions::basic_loop;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -67,5 +71,19 @@ fn main() {
             parse_json_file_to_midi_functions_with_midi_msgs_advanced(&filepath)
         },
     );
+    let (midi_sender, midi_receiver): (
+        std::sync::mpsc::SyncSender<Box<dyn MidiMsg>>,
+        std::sync::mpsc::Receiver<Box<dyn MidiMsg>>,
+    ) = mpsc::sync_channel(64);
+    let (tx_close, rx_close) = unbounded();
+
+    let jack_midi_thread = start_jack_thread(rx_close, midi_sender);
+
     println!("midi_mapping: {:?}", midi_functions_with_midi_advanced_msgs);
+    basic_loop(
+        midi_functions_with_midi_advanced_msgs.unwrap(),
+        Some(jack_midi_thread),
+        Some(tx_close),
+        Some(midi_receiver),
+    )
 }
