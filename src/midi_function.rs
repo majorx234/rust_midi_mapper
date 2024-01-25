@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::io::Read;
 use std::result::Result;
 use std::{fmt, fs::File};
@@ -43,4 +44,22 @@ pub fn parse_json_file_to_midi_functions(
     let module: MidiFunctionFile = serde_json::from_str(contents.as_str())
         .map_err(|err| format!("error in json deserialize {}", err))?;
     Ok(module)
+}
+
+#[derive(Default, Debug, Serialize, Deserialize)]
+pub struct MidiFunctionWithElementsFile {
+    pub midi_functions: HashMap<String, Vec<u16>>,
+}
+
+pub fn parse_json_file_to_midi_functions_with_elements_ids(
+    file_path_str: &String,
+) -> Result<HashMap<String, Vec<u16>>, String> {
+    let mut file_content =
+        File::open(file_path_str).map_err(|err| format!("Could not read the json file {}", err))?;
+    let mut contents = String::new();
+    file_content
+        .read_to_string(&mut contents)
+        .map_err(|err| format!("Could not read file to string {}", err))?;
+    let map: HashMap<String, Vec<u16>> = serde_json::from_str(contents.as_str()).unwrap();
+    Ok(map)
 }
