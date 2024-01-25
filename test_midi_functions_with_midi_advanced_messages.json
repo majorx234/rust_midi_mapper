@@ -1,0 +1,16 @@
+{
+    "Volume":[
+        {"MidiControl2IdsValue":[57344,57344,0]}
+    ],
+    "AmIntensity":[
+        {"MidiControlIdValue":[45057,0]}
+    ],
+    "Modulate":[
+        {"MidiNoteOnOff":[36906,32810,false]},
+        {"MidiNoteOnOff":[36907,32811,false]}
+    ],
+    "FmIntensity":[
+        {"MidiNoteOnOff":[36889,32793,false]},
+        {"MidiNoteOnOff":[36912,32816,false]}
+    ]
+}

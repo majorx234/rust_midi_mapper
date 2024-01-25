@@ -150,7 +150,6 @@ impl eframe::App for MidiElementsGui {
                                                 .midi_functions_with_elements_ids
                                                 .get_mut(selected_midi_function)
                                             {
-                                                // ToDo insert MidiAdvanced here
                                                 let midi_advancecd_msg =
                                                     MidiMsgAdvanced::MidiNoteOnOff(
                                                         *id0, *id1, false,
@@ -175,7 +174,6 @@ impl eframe::App for MidiElementsGui {
                                                 .midi_functions_with_elements_ids
                                                 .get_mut(selected_midi_function)
                                             {
-                                                // ToDo insert MidiAdvanced here
                                                 let midi_advancecd_msg =
                                                     MidiMsgAdvanced::MidiControlIdValue(*id, 0);
                                                 midi_elements_id.push(midi_advancecd_msg);
