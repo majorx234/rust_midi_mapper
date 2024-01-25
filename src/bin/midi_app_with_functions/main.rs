@@ -18,9 +18,12 @@
 use std::collections::HashMap;
 
 use clap::Parser;
-use midi_mapper::midi_function::{
-    parse_json_file_to_midi_functions, parse_json_file_to_midi_functions_with_elements_ids,
-    MidiFunction, MidiFunctionFile,
+use midi_mapper::{
+    jackmidi::MidiMsgAdvanced,
+    midi_function::{
+        parse_json_file_to_midi_functions,
+        parse_json_file_to_midi_functions_with_midi_msgs_advanced, MidiFunction, MidiFunctionFile,
+    },
 };
 
 #[derive(Parser, Debug)]
@@ -54,13 +57,15 @@ fn main() {
         },
     );
     println!("midi_function: {:?}", midi_functions);
-    let midi_functions_with_elements_ids: Result<HashMap<String, Vec<u16>>, String> =
-        Args::parse().midi_mapping_filepath.map_or_else(
-            || Ok(HashMap::<String, Vec<u16>>::new()),
-            |filepath| {
-                // Todo: parse filepath
-                parse_json_file_to_midi_functions_with_elements_ids(&filepath)
-            },
-        );
-    println!("midi_mapping: {:?}", midi_functions_with_elements_ids);
+    let midi_functions_with_midi_advanced_msgs: Result<
+        HashMap<String, Vec<MidiMsgAdvanced>>,
+        String,
+    > = Args::parse().midi_mapping_filepath.map_or_else(
+        || Ok(HashMap::<String, Vec<MidiMsgAdvanced>>::new()),
+        |filepath| {
+            // Todo: parse filepath
+            parse_json_file_to_midi_functions_with_midi_msgs_advanced(&filepath)
+        },
+    );
+    println!("midi_mapping: {:?}", midi_functions_with_midi_advanced_msgs);
 }

@@ -138,6 +138,23 @@ impl std::fmt::Display for MidiMsgAdvanced {
     }
 }
 
+impl std::fmt::Debug for MidiMsgAdvanced {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::MidiEmpty => write!(f, "MidiEmpty"),
+            Self::MidiNoteOnOff(id0, id1, value) => {
+                write!(f, "NoteOnOff({}, {}, {})", id0, id1, *value)
+            }
+            Self::MidiControlIdValue(id, value) => {
+                write!(f, "MidiControlIdValue({}, {})", id, value)
+            }
+            Self::MidiControl2IdsValue(id0, id1, value) => {
+                write!(f, "MidiControl2IdsValue({}, {}, {})", id0, id1, value)
+            }
+        }
+    }
+}
+
 pub trait MidiMsg: Send + std::fmt::Display {
     fn type_of(&self) -> &str;
     fn get_data(&self) -> Vec<u8>;
