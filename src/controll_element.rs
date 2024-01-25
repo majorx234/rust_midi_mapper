@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 pub enum Scaling {
     LINEAR,
     LOGARITHMIC,
-    EXPONETIONAL,
+    EXPONENTIAL,
 }
 
 #[derive(Eq, PartialEq, Serialize, Deserialize, Clone, Debug)]

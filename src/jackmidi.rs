@@ -16,12 +16,13 @@
  */
 
 use crate::util::*;
+use serde::{Deserialize, Serialize};
 use std::convert::From;
 
 const MAX_MIDI: usize = 3;
 type MidiId = u16;
 
-#[derive(Copy, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum MidiMsgAdvanced {
     MidiEmpty,
     MidiNoteOnOff(MidiId, MidiId, bool),
@@ -116,6 +117,23 @@ impl MidiMsgAdvanced {
                 midi_msg_value,
             )),
             _ => None,
+        }
+    }
+}
+
+impl std::fmt::Display for MidiMsgAdvanced {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::MidiEmpty => write!(f, "MidiEmpty"),
+            Self::MidiNoteOnOff(id0, id1, value) => {
+                write!(f, "NoteOnOff({}, {}, {})", id0, id1, *value)
+            }
+            Self::MidiControlIdValue(id, value) => {
+                write!(f, "MidiControlIdValue({}, {})", id, value)
+            }
+            Self::MidiControl2IdsValue(id0, id1, value) => {
+                write!(f, "MidiControl2IdsValue({}, {}, {})", id0, id1, value)
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ use clap::Parser;
 use crossbeam_channel::unbounded;
 use eframe::{self, egui::ViewportBuilder};
 use midi_mapper::{
-    jackmidi::MidiMsg,
+    jackmidi::{MidiMsg, MidiMsgAdvanced},
     jackprocess::start_jack_thread,
     midi_function::{parse_json_file_to_midi_functions, MidiFunction, MidiFunctionFile},
 };
@@ -64,7 +64,8 @@ fn main() {
         },
     );
     let mut midi_functions_set = HashSet::new();
-    let mut midi_functions_with_elements_ids: HashMap<String, Vec<u16>> = HashMap::new();
+    let mut midi_functions_with_elements_ids: HashMap<String, Vec<MidiMsgAdvanced>> =
+        HashMap::new();
     for midi_function in midi_functions.midi_functions.into_iter() {
         midi_functions_with_elements_ids.insert(midi_function.get_name(), Vec::new());
         midi_functions_set.insert(midi_function);
