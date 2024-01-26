@@ -39,6 +39,16 @@ pub fn basic_loop(
                 }
             }
         }
+        for midi_advanced_msg in received_midi_advanced_messages {
+            if let Some(functions) = midi_advanced_msgs2midi_functions.get(&midi_advanced_msg) {
+                for function in functions {
+                    println!(
+                        "function: {} called with msgs: {}",
+                        function, midi_advanced_msg
+                    );
+                }
+            }
+        }
         // compare
     }
 }
