@@ -22,7 +22,7 @@ use std::convert::From;
 const MAX_MIDI: usize = 3;
 type MidiId = u16;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Eq, Hash, PartialEq, Serialize, Deserialize, Clone)]
 pub enum MidiMsgAdvanced {
     MidiEmpty,
     MidiNoteOnOff(MidiId, MidiId, bool),
