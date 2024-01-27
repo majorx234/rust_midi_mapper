@@ -214,6 +214,18 @@ impl std::fmt::Display for MidiMsgGeneric {
     }
 }
 
+impl From<jack::RawMidi<'_>> for MidiMsgGeneric {
+    fn from(midi: jack::RawMidi<'_>) -> MidiMsgGeneric {
+        let mut data: [u8; MAX_MIDI] = [0, 0, 0];
+        data[..MAX_MIDI].copy_from_slice(&midi.bytes[..MAX_MIDI]);
+        MidiMsgGeneric {
+            len: MAX_MIDI,
+            data,
+            time: midi.time as u64 + jack::get_time(),
+        }
+    }
+}
+
 pub struct MidiMsgControlChange {
     pub channel: u8,
     pub control: u8,
