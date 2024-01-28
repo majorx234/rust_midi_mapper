@@ -453,3 +453,51 @@ impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
         }
     }
 }
+
+impl From<MidiMsgGeneric> for Box<dyn MidiMsg> {
+    fn from(midi: MidiMsgGeneric) -> Box<dyn MidiMsg> {
+        let midi_time = midi.time;
+        let len = midi.len;
+        let (status, channel) = from_status_byte(midi.data[0]);
+        if status == 0x08 {
+            // NoteOff
+            Box::new(MidiMsgNoteOff {
+                channel,
+                key: mask7(midi.data[1]),
+                velocity: mask7(midi.data[2]),
+                time: midi_time,
+            })
+        } else if status == 0x09 {
+            // NoteOn
+            Box::new(MidiMsgNoteOn {
+                channel,
+                key: mask7(midi.data[1]),
+                velocity: mask7(midi.data[2]),
+                time: midi_time,
+            })
+        } else if status == 0x0b {
+            // MidiCC
+            Box::new(MidiMsgControlChange {
+                channel,
+                control: mask7(midi.data[1]),
+                value: mask7(midi.data[2]),
+                time: midi_time,
+            })
+        } else if status == 0x0e {
+            // MidiPitchBend
+            Box::new(MidiMsgPitchBend {
+                channel,
+                value: msb_lsb_to_u14(mask7(midi.data[2]), mask7(midi.data[1])),
+                time: midi_time,
+            })
+        } else {
+            let mut data = [0; MAX_MIDI];
+            data[..len].copy_from_slice(&midi.data[..len]);
+            Box::new(MidiMsgGeneric {
+                len,
+                data,
+                time: midi_time,
+            })
+        }
+    }
+}
