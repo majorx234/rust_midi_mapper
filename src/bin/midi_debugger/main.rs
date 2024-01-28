@@ -17,15 +17,15 @@
 
 use crossbeam_channel::unbounded;
 use eframe::{self, egui::ViewportBuilder};
-use midi_mapper::{jackmidi::MidiMsg, jackprocess::start_jack_thread};
+use midi_mapper::{jackmidi::MidiMsgBase, jackprocess::start_jack_thread};
 use std::sync::mpsc;
 mod midi_debugger_gui;
 use midi_debugger_gui::MidiDebuggerGui;
 
 fn main() {
     let (midi_sender, midi_receiver): (
-        std::sync::mpsc::SyncSender<Box<dyn MidiMsg>>,
-        std::sync::mpsc::Receiver<Box<dyn MidiMsg>>,
+        std::sync::mpsc::SyncSender<Box<dyn MidiMsgBase>>,
+        std::sync::mpsc::Receiver<Box<dyn MidiMsgBase>>,
     ) = mpsc::sync_channel(64);
     let (tx_close, rx_close) = unbounded();
     let jack_midi_thread = start_jack_thread(rx_close, midi_sender);

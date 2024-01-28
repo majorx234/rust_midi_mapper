@@ -17,13 +17,13 @@
 
 extern crate jack;
 
-use crate::jackmidi::MidiMsg;
+use crate::jackmidi::MidiMsgBase;
 
 use std::{process::exit, thread, time::Duration};
 
 pub fn start_jack_thread(
     rx_close: crossbeam_channel::Receiver<bool>,
-    midi_sender: std::sync::mpsc::SyncSender<Box<dyn MidiMsg>>,
+    midi_sender: std::sync::mpsc::SyncSender<Box<dyn MidiMsgBase>>,
 ) -> std::thread::JoinHandle<()> {
     std::thread::spawn(move || {
         let mut run: bool = true;
@@ -52,7 +52,7 @@ pub fn start_jack_thread(
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
             for e in show_p {
-                let c: Box<dyn MidiMsg> = e.into();
+                let c: Box<dyn MidiMsgBase> = e.into();
                 let _ = midi_sender.try_send(c);
             }
             jack::Control::Continue

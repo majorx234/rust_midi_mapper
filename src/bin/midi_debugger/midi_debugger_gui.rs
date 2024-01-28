@@ -16,14 +16,14 @@
  */
 
 use eframe::egui::{self, ScrollArea, ViewportCommand};
-use midi_mapper::jackmidi::MidiMsg;
+use midi_mapper::jackmidi::MidiMsgBase;
 
 pub struct MidiDebuggerGui {
-    pub midi_receiver: Option<std::sync::mpsc::Receiver<Box<dyn MidiMsg>>>,
+    pub midi_receiver: Option<std::sync::mpsc::Receiver<Box<dyn MidiMsgBase>>>,
     pub midi_thread: Option<std::thread::JoinHandle<()>>,
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub n_items: usize,
-    pub midi_msgs: Vec<Box<dyn MidiMsg>>,
+    pub midi_msgs: Vec<Box<dyn MidiMsgBase>>,
 }
 
 impl Default for MidiDebuggerGui {

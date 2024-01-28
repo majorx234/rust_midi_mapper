@@ -77,7 +77,10 @@ impl MidiMsgAdvanced {
     }
 
     pub fn from_current_and_last_opt_midi_msgs(
-        (current_midi_msg, last_opt_midi_msg): (Box<dyn MidiMsg>, &mut Option<Box<dyn MidiMsg>>),
+        (current_midi_msg, last_opt_midi_msg): (
+            Box<dyn MidiMsgBase>,
+            &mut Option<Box<dyn MidiMsgBase>>,
+        ),
     ) -> Option<Self> {
         let mut id = current_midi_msg.get_id();
         let last_last_midi_msg = last_opt_midi_msg.take();
@@ -155,7 +158,7 @@ impl std::fmt::Debug for MidiMsgAdvanced {
     }
 }
 
-pub trait MidiMsg: Send + std::fmt::Display {
+pub trait MidiMsgBase: Send + std::fmt::Display {
     fn type_of(&self) -> &str;
     fn get_data(&self) -> Vec<u8>;
     fn get_id(&self) -> u16;
@@ -171,7 +174,7 @@ pub struct MidiMsgGeneric {
     pub time: u64,
 }
 
-impl MidiMsg for MidiMsgGeneric {
+impl MidiMsgBase for MidiMsgGeneric {
     fn type_of(&self) -> &str {
         "MidiMsgGeneric"
     }
@@ -233,7 +236,7 @@ pub struct MidiMsgControlChange {
     pub time: u64,
 }
 
-impl MidiMsg for MidiMsgControlChange {
+impl MidiMsgBase for MidiMsgControlChange {
     fn type_of(&self) -> &str {
         "MidiMsgControlChange"
     }
@@ -278,7 +281,7 @@ pub struct MidiMsgNoteOn {
     pub time: u64,
 }
 
-impl MidiMsg for MidiMsgNoteOn {
+impl MidiMsgBase for MidiMsgNoteOn {
     fn type_of(&self) -> &str {
         "MidiMsgNoteOn"
     }
@@ -323,7 +326,7 @@ pub struct MidiMsgNoteOff {
     pub time: u64,
 }
 
-impl MidiMsg for MidiMsgNoteOff {
+impl MidiMsgBase for MidiMsgNoteOff {
     fn type_of(&self) -> &str {
         "MidiMsgNoteOff"
     }
@@ -367,7 +370,7 @@ pub struct MidiMsgPitchBend {
     pub time: u64,
 }
 
-impl MidiMsg for MidiMsgPitchBend {
+impl MidiMsgBase for MidiMsgPitchBend {
     fn type_of(&self) -> &str {
         "MidiMsgPitchBend"
     }
@@ -406,8 +409,8 @@ impl std::fmt::Display for MidiMsgPitchBend {
     }
 }
 
-impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
-    fn from(midi: jack::RawMidi<'_>) -> Box<dyn MidiMsg> {
+impl From<jack::RawMidi<'_>> for Box<dyn MidiMsgBase> {
+    fn from(midi: jack::RawMidi<'_>) -> Box<dyn MidiMsgBase> {
         let midi_time = midi.time as u64 + jack::get_time();
         let len = std::cmp::min(MAX_MIDI, midi.bytes.len());
         let (status, channel) = from_status_byte(midi.bytes[0]);
@@ -454,8 +457,8 @@ impl From<jack::RawMidi<'_>> for Box<dyn MidiMsg> {
     }
 }
 
-impl From<MidiMsgGeneric> for Box<dyn MidiMsg> {
-    fn from(midi: MidiMsgGeneric) -> Box<dyn MidiMsg> {
+impl From<MidiMsgGeneric> for Box<dyn MidiMsgBase> {
+    fn from(midi: MidiMsgGeneric) -> Box<dyn MidiMsgBase> {
         let midi_time = midi.time;
         let len = midi.len;
         let (status, channel) = from_status_byte(midi.data[0]);

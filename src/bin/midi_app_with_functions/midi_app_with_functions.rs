@@ -1,11 +1,11 @@
-use midi_mapper::jackmidi::{MidiMsg, MidiMsgAdvanced};
+use midi_mapper::jackmidi::{MidiMsgAdvanced, MidiMsgBase};
 use std::collections::HashMap;
 
 pub fn basic_loop(
     function_msgs_map: HashMap<String, Vec<MidiMsgAdvanced>>,
     midi_thread: Option<std::thread::JoinHandle<()>>,
     tx_close: Option<crossbeam_channel::Sender<bool>>,
-    midi_receiver: Option<std::sync::mpsc::Receiver<Box<dyn MidiMsg>>>,
+    midi_receiver: Option<std::sync::mpsc::Receiver<Box<dyn MidiMsgBase>>>,
 ) {
     // creat a reverse Hashmap
     let mut midi_advanced_msgs2midi_functions: HashMap<MidiMsgAdvanced, Vec<String>> =
@@ -22,7 +22,7 @@ pub fn basic_loop(
             }
         }
     }
-    let mut last_midi_msg: Option<Box<dyn MidiMsg>> = None;
+    let mut last_midi_msg: Option<Box<dyn MidiMsgBase>> = None;
     let mut run_loop = true;
     while run_loop {
         let mut received_midi_advanced_messages: Vec<MidiMsgAdvanced> = Vec::new();

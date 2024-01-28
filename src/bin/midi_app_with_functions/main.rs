@@ -20,7 +20,7 @@ use std::{collections::HashMap, sync::mpsc};
 
 use clap::Parser;
 use midi_mapper::{
-    jackmidi::{MidiMsg, MidiMsgAdvanced},
+    jackmidi::{MidiMsgAdvanced, MidiMsgBase},
     jackprocess::start_jack_thread,
     midi_function::{
         parse_json_file_to_midi_functions,
@@ -72,8 +72,8 @@ fn main() {
         },
     );
     let (midi_sender, midi_receiver): (
-        std::sync::mpsc::SyncSender<Box<dyn MidiMsg>>,
-        std::sync::mpsc::Receiver<Box<dyn MidiMsg>>,
+        std::sync::mpsc::SyncSender<Box<dyn MidiMsgBase>>,
+        std::sync::mpsc::Receiver<Box<dyn MidiMsgBase>>,
     ) = mpsc::sync_channel(64);
     let (tx_close, rx_close) = unbounded();
 

@@ -17,7 +17,7 @@
 
 use eframe::egui::{self, ScrollArea, ViewportCommand};
 use midi_mapper::{
-    jackmidi::{MidiMsg, MidiMsgAdvanced},
+    jackmidi::{MidiMsgAdvanced, MidiMsgBase},
     midi_egui_elements::midi_id_value_indicator,
     midi_egui_elements::{midi_id_double_precision_value_indicator, midi_note_status_indicator},
     midi_function::MidiFunction,
@@ -28,7 +28,7 @@ use std::{
 };
 
 pub struct MidiElementsGui {
-    pub midi_receiver: Option<std::sync::mpsc::Receiver<Box<dyn MidiMsg>>>,
+    pub midi_receiver: Option<std::sync::mpsc::Receiver<Box<dyn MidiMsgBase>>>,
     pub midi_thread: Option<std::thread::JoinHandle<()>>,
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub n_items: usize,
@@ -36,7 +36,7 @@ pub struct MidiElementsGui {
     pub midi_functions_with_elements_ids: HashMap<String, Vec<MidiMsgAdvanced>>,
     pub midi_elements_map: HashMap<u16, (usize, MidiMsgAdvanced)>,
     pub selected_midi_function: Option<String>,
-    pub last_midi_msg: Option<Box<dyn MidiMsg>>,
+    pub last_midi_msg: Option<Box<dyn MidiMsgBase>>,
     pub num_detected_midi_ids: usize,
 }
 
