@@ -136,8 +136,13 @@ impl eframe::App for MidiElementsGui {
                         for (row, (_key, midi_advanced_msg)) in midi_elements_vec.iter().enumerate()
                         {
                             if row_range.contains(&row) {
-                                if let MidiMsgAdvanced::MidiNoteOnOff(id0, id1, value) =
-                                    midi_advanced_msg
+                                if let MidiMsgAdvanced::MidiNoteOnOff(
+                                    id0,
+                                    id1,
+                                    value,
+                                    note,
+                                    intensity,
+                                ) = midi_advanced_msg
                                 {
                                     if ui
                                         .add(midi_note_status_indicator(*id0 as u32, &value))
@@ -152,7 +157,7 @@ impl eframe::App for MidiElementsGui {
                                             {
                                                 let midi_advancecd_msg =
                                                     MidiMsgAdvanced::MidiNoteOnOff(
-                                                        *id0, *id1, false,
+                                                        *id0, *id1, false, *note, *intensity,
                                                     );
                                                 midi_elements_id.push(midi_advancecd_msg);
                                             }
