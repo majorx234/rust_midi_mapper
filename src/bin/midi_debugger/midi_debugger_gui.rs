@@ -65,11 +65,11 @@ impl eframe::App for MidiDebuggerGui {
                 let row_height = ui.text_style_height(&text_style);
                 ScrollArea::vertical()
                     .stick_to_bottom(true)
-                    .min_scrolled_height(window_height - 60.0)
-                    .max_height(window_height - 60.0)
-                    .min_scrolled_width(window_width - 40.0)
-                    .max_width(window_width - 40.0)
-                    .show_rows(ui, row_height, self.n_items, |ui, row_range| {
+                    .min_scrolled_height(window_height - 80.0)
+                    .max_height(window_height - 80.0)
+                    .min_scrolled_width(window_width - 60.0)
+                    .max_width(window_width - 60.0)
+                    .show_rows(ui, row_height, self.n_items + 1, |ui, row_range| {
                         for row in row_range {
                             if row > 0 {
                                 let text = format!("{}", self.midi_msgs[row - 1]);
