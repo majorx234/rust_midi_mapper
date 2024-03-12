@@ -19,7 +19,9 @@ use eframe::egui::{self, ScrollArea, ViewportCommand};
 use midi_mapper::{
     jackmidi::{MidiMsgAdvanced, MidiMsgBase},
     midi_egui_elements::midi_id_value_indicator,
-    midi_egui_elements::{midi_id_double_precision_value_indicator, midi_note_status_indicator},
+    midi_egui_elements::{
+        midi_id_double_precision_value_indicator, midi_note_status_intensity_indicator,
+    },
     midi_function::MidiFunction,
 };
 use std::{
@@ -145,7 +147,11 @@ impl eframe::App for MidiElementsGui {
                                 ) = midi_advanced_msg
                                 {
                                     if ui
-                                        .add(midi_note_status_indicator(*id0 as u32, &value))
+                                        .add(midi_note_status_intensity_indicator(
+                                            *id0 as u32,
+                                            &value,
+                                            *intensity as u32,
+                                        ))
                                         .clicked()
                                     {
                                         if let Some(ref selected_midi_function) =
