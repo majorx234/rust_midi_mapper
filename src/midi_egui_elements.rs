@@ -178,6 +178,19 @@ fn midi_note_status_intensity_indicator_ui(
                 Stroke::NONE,
             );
         }
+        let intensity_rect = egui::Rect::from_min_size(
+            rect.min,
+            egui::vec2(
+                (rect.width() * fill_level_intensity).max(rect.height()),
+                rect.height() / 2.0,
+            ),
+        );
+        ui.painter().rect(
+            intensity_rect,
+            rounding,
+            egui::Color32::from(egui::Rgba::from(visuals.error_fg_color)),
+            Stroke::NONE,
+        );
         let text_id: egui::WidgetText = format!("{}", id).into();
         let galley_note =
             text_id.into_galley(ui, Some(false), f32::INFINITY, egui::TextStyle::Button);
