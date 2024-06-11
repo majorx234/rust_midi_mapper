@@ -77,7 +77,7 @@ fn main() {
     ) = mpsc::sync_channel(64);
     let (tx_close, rx_close) = unbounded();
 
-    let jack_midi_thread = start_jack_thread(rx_close, midi_sender);
+    let jack_midi_thread = start_jack_thread(rx_close, midi_sender,"midi_app".to_string());
 
     println!("midi_mapping: {:?}", midi_functions_with_midi_advanced_msgs);
     basic_loop(

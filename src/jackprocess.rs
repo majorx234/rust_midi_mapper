@@ -24,17 +24,19 @@ use std::{process::exit, thread, time::Duration};
 pub fn start_jack_thread(
     rx_close: crossbeam_channel::Receiver<bool>,
     midi_sender: std::sync::mpsc::SyncSender<Box<dyn MidiMsgBase>>,
+    device_name: String,
 ) -> std::thread::JoinHandle<()> {
     std::thread::spawn(move || {
         let mut run: bool = true;
         let (client, _status) =
-            jack::Client::new("midi mapper", jack::ClientOptions::NO_START_SERVER)
+            jack::Client::new(&device_name, jack::ClientOptions::NO_START_SERVER)
                 .expect("No Jack server running\n");
 
         let sample_rate = client.sample_rate();
         // register ports
+        let midi_in_name: String = device_name.to_string() + "_midi_in";
         let midi_in = client
-            .register_port("midi_mapper_midi_in", jack::MidiIn::default())
+            .register_port(&midi_in_name, jack::MidiIn::default())
             .unwrap();
 
         let mut frame_size = client.buffer_size() as usize;
