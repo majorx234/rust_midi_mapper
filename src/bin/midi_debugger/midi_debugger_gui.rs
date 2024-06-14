@@ -59,6 +59,12 @@ impl eframe::App for MidiDebuggerGui {
                     };
                 }
 
+                if ui.button("clear").clicked() {
+                    // TODO clear
+                    self.n_items = 0;
+                    self.midi_msgs.clear();
+                }
+
                 self.midi_msgs.append(&mut received_midi_msgs);
                 self.n_items = self.midi_msgs.len();
                 let text_style = egui::TextStyle::Body;
