@@ -120,7 +120,7 @@ impl eframe::App for MidiElementsGui {
 
         // show list of Midi events
         egui::SidePanel::right("midi id events").show(ctx, |ui| {
-            let window_rect = ctx.input(|i| i.viewport().outer_rect).unwrap();
+            let window_rect = ctx.screen_rect();
             let window_width = window_rect.width();
             let window_height = window_rect.height();
 
